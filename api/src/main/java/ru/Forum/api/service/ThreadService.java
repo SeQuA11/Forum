@@ -48,13 +48,20 @@ public class ThreadService {
                 .map(this::convertToDTO);
     }
 
+    @Transactional(readOnly = true)
+    public ThreadResponseDTO getThreadById(Long id) {
+        Thread thread = threadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Тема не найдена: " + id));
+        return convertToDTO(thread);
+    }
+
     @Transactional
     public ThreadResponseDTO create(ThreadCreateDTO dto, String username) {
         User author = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
 
         Category category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Категория не найдена"));
+                .orElseThrow(() -> new RuntimeException("Категория не найдена: " + dto.getCategoryId()));
 
         Thread thread = new Thread();
         thread.setTitle(dto.getTitle());
@@ -67,10 +74,58 @@ public class ThreadService {
         return convertToDTO(threadRepository.save(thread));
     }
 
+    @Transactional
+    public ThreadResponseDTO update(Long id, ThreadCreateDTO dto, String username) {
+        Thread thread = threadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Тема не найдена: " + id));
+
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        // Проверка прав: только автор, модератор или админ могут редактировать
+        if (!thread.getAuthor().getUsername().equals(username) &&
+                !currentUser.getRole().name().equals("MODERATOR") &&
+                !currentUser.getRole().name().equals("ADMIN")) {
+            throw new RuntimeException("Нет прав на редактирование этой темы");
+        }
+
+        thread.setTitle(dto.getTitle());
+        thread.setContent(dto.getContent());
+
+        return convertToDTO(threadRepository.save(thread));
+    }
+
+    @Transactional
+    public void delete(Long id, String username) {
+        Thread thread = threadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Тема не найдена: " + id));
+
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        // Проверка прав: только автор, модератор или админ могут удалять
+        if (!thread.getAuthor().getUsername().equals(username) &&
+                !currentUser.getRole().name().equals("MODERATOR") &&
+                !currentUser.getRole().name().equals("ADMIN")) {
+            throw new RuntimeException("Нет прав на удаление этой темы");
+        }
+
+        threadRepository.delete(thread);
+    }
+
+    @Transactional
+    public ThreadResponseDTO updateStatus(Long id, ThreadStatus status) {
+        Thread thread = threadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Тема не найдена: " + id));
+
+        thread.setStatus(status);
+        return convertToDTO(threadRepository.save(thread));
+    }
+
     @Transactional(readOnly = true)
     public ThreadResponseDTO incrementViews(Long id) {
         Thread thread = threadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Тема не найдена"));
+                .orElseThrow(() -> new RuntimeException("Тема не найдена: " + id));
 
         thread.setViewsCount(thread.getViewsCount() + 1);
         return convertToDTO(thread);

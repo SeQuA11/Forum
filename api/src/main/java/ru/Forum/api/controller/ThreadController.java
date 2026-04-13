@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.Forum.api.dto.ThreadCreateDTO;
 import ru.Forum.api.dto.ThreadResponseDTO;
+import ru.Forum.api.entity.ThreadStatus;
 import ru.Forum.api.service.ThreadService;
 
 @RestController
@@ -45,6 +46,14 @@ public class ThreadController {
         return ResponseEntity.ok(threadService.getThreadsByCategory(categoryId, page, size));
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Получить тему по ID")
+    @ApiResponse(responseCode = "200", description = "Данные темы")
+    @ApiResponse(responseCode = "404", description = "Тема не найдена")
+    public ResponseEntity<ThreadResponseDTO> getThread(@PathVariable Long id) {
+        return ResponseEntity.ok(threadService.getThreadById(id));
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @Operation(summary = "Создать новую тему")
@@ -55,6 +64,46 @@ public class ThreadController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         ThreadResponseDTO thread = threadService.create(dto, username);
         return ResponseEntity.status(201).body(thread);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
+    @Operation(summary = "Обновить тему (автор или модератор)")
+    @ApiResponse(responseCode = "200", description = "Тема обновлена")
+    @ApiResponse(responseCode = "400", description = "Ошибка валидации")
+    @ApiResponse(responseCode = "403", description = "Нет прав")
+    @ApiResponse(responseCode = "404", description = "Тема не найдена")
+    public ResponseEntity<ThreadResponseDTO> updateThread(
+            @PathVariable Long id,
+            @Valid @RequestBody ThreadCreateDTO dto) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        ThreadResponseDTO updated = threadService.update(id, dto, username);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
+    @Operation(summary = "Удалить тему (автор, модератор или админ)")
+    @ApiResponse(responseCode = "204", description = "Тема удалена")
+    @ApiResponse(responseCode = "403", description = "Нет прав")
+    @ApiResponse(responseCode = "404", description = "Тема не найдена")
+    public ResponseEntity<Void> deleteThread(@PathVariable Long id) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        threadService.delete(id, username);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
+    @Operation(summary = "Изменить статус темы (модерация)")
+    @ApiResponse(responseCode = "200", description = "Статус изменен")
+    @ApiResponse(responseCode = "403", description = "Нет прав")
+    @ApiResponse(responseCode = "404", description = "Тема не найдена")
+    public ResponseEntity<ThreadResponseDTO> updateThreadStatus(
+            @PathVariable Long id,
+            @RequestParam ThreadStatus status) {
+        ThreadResponseDTO updated = threadService.updateStatus(id, status);
+        return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/{id}/view")

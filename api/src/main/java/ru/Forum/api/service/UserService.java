@@ -10,7 +10,9 @@ import ru.Forum.api.entity.Role;
 import ru.Forum.api.entity.User;
 import ru.Forum.api.repository.UserRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,10 +36,9 @@ public class UserService {
             throw new RuntimeException("Email уже зарегистрирован");
         }
 
-        // 👇 Используем конструктор + сеттеры вместо builder
         User user = new User();
         user.setUsername(dto.getUsername());
-        user.setEmail(dto.getUsername()); // Замените на dto.getEmail() если есть
+        user.setEmail(dto.getUsername());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.USER);
         user.setIsBanned(false);
@@ -58,7 +59,7 @@ public class UserService {
             throw new RuntimeException("Пользователь заблокирован");
         }
 
-        return "TOKEN_PLACEHOLDER"; // Замените на вызов jwtTokenProvider.generateToken()
+        return "TOKEN_PLACEHOLDER";
     }
 
     @Transactional(readOnly = true)
@@ -71,6 +72,28 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
         return convertToDTO(user);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<UserDTO> getUserById(Long id) {
+        return userRepository.findById(id).map(this::convertToDTO);
+    }
+
+    @Transactional
+    public UserDTO banUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + id));
+
+        user.setIsBanned(!user.getIsBanned());
+        return convertToDTO(userRepository.save(user));
     }
 
     private UserDTO convertToDTO(User user) {
