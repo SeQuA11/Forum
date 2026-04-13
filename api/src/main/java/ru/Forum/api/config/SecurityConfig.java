@@ -28,6 +28,11 @@ public class SecurityConfig {
     private final UserService userService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    public SecurityConfig(UserService userService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.userService = userService;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http

@@ -20,10 +20,6 @@ public class AuthController {
 
     private final UserService userService;
 
-    public AuthController(UserService userService) {
-        this.userService = userService;
-    }
-
     @PostMapping("/register")
     @Operation(summary = "Регистрация нового пользователя")
     @ApiResponse(responseCode = "201", description = "Пользователь успешно зарегистрирован")
@@ -42,7 +38,7 @@ public class AuthController {
         String token = userService.authenticate(dto);
 
         UserDTO user = userService.findById(
-                userService.loadUserByUsername(dto.getUsername()).hashCode()
+                (long) userService.loadUserByUsername(dto.getUsername()).hashCode()
         ).orElse(null);
 
         AuthResponseDTO response = AuthResponseDTO.builder()

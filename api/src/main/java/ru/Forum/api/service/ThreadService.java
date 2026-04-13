@@ -28,6 +28,12 @@ public class ThreadService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
+    public ThreadService(ThreadRepository threadRepository, CategoryRepository categoryRepository, UserRepository userRepository) {
+        this.threadRepository = threadRepository;
+        this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
+    }
+
     @Transactional(readOnly = true)
     public Page<ThreadResponseDTO> getActiveThreads(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());

@@ -16,6 +16,10 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
+    public CategoryService(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
+
     @Transactional(readOnly = true)
     public List<CategoryDTO> getAllActiveCategories() {
         return categoryRepository.findByIsActiveTrueOrderBySortOrderAsc()
