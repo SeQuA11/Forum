@@ -10,6 +10,7 @@ import ru.Forum.api.entity.Role;
 import ru.Forum.api.entity.User;
 import ru.Forum.api.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,6 +43,8 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.USER);
         user.setIsBanned(false);
+        user.setCreatedAt(LocalDateTime.now());  // Добавляем
+        user.setUpdatedAt(LocalDateTime.now());  // Добавляем эту строку!
 
         userRepository.save(user);
         return convertToDTO(user);

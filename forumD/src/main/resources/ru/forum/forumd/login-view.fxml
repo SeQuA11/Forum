@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ru.forum.forumd.LoginController"
+      stylesheets="@styles.css">
+
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
+
+    <Label text="ФОРУМ С МОДЕРАЦИЕЙ" styleClass="title-label"/>
+
+    <!-- Форма входа -->
+    <VBox fx:id="loginForm" alignment="CENTER" spacing="15.0">
+        <Label text="Вход в систему" styleClass="section-label"/>
+
+        <TextField fx:id="usernameField" promptText="Имя пользователя" maxWidth="300"/>
+        <PasswordField fx:id="passwordField" promptText="Пароль" maxWidth="300"/>
+
+        <Button text="Войти" onAction="#onLoginButtonClick" styleClass="primary-button" maxWidth="300"/>
+        <Button text="Регистрация" onAction="#onRegisterButtonClick" styleClass="secondary-button" maxWidth="300"/>
+
+        <Label fx:id="errorLabel" styleClass="error-label"/>
+    </VBox>
+
+    <!-- Форма регистрации -->
+    <VBox fx:id="registerForm" alignment="CENTER" spacing="15.0" visible="false" managed="false">
+        <Label text="Регистрация" styleClass="section-label"/>
+
+        <TextField fx:id="regUsernameField" promptText="Имя пользователя" maxWidth="300"/>
+        <PasswordField fx:id="regPasswordField" promptText="Пароль (мин. 8 символов)" maxWidth="300"/>
+
+        <Button text="Зарегистрироваться" onAction="#onRegisterSubmitClick" styleClass="primary-button" maxWidth="300"/>
+        <Button text="Назад ко входу" onAction="#onBackToLoginClick" styleClass="secondary-button" maxWidth="300"/>
+
+        <Label fx:id="registerErrorLabel" styleClass="error-label"/>
+    </VBox>
+</VBox>

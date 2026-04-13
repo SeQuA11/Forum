@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="ru.forum.forumd.ForumController"
+            stylesheets="@styles.css">
+
+    <!-- Верхняя панель -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="top-bar">
+            <padding>
+                <Insets bottom="10.0" left="20.0" right="20.0" top="10.0"/>
+            </padding>
+
+            <Label fx:id="welcomeLabel" styleClass="welcome-label"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="roleLabel" styleClass="role-label"/>
+            <Button text="Выйти" onAction="#onLogoutClick" styleClass="logout-button"/>
+        </HBox>
+    </top>
+
+    <!-- Левая панель с категориями -->
+    <left>
+        <VBox spacing="10.0" styleClass="sidebar" prefWidth="250.0">
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+            </padding>
+
+            <Label text="Категории" styleClass="section-label"/>
+            <ListView fx:id="categoryListView" VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </left>
+
+    <!-- Центральная область с темами -->
+    <center>
+        <VBox spacing="10.0">
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+            </padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                <Label text="Темы форума" styleClass="section-label"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Обновить" onAction="#onRefreshClick"/>
+                <Button text="Создать тему" onAction="#onCreateThreadClick" styleClass="primary-button"/>
+            </HBox>
+
+            <TableView fx:id="threadsTableView" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="idColumn" text="ID" prefWidth="50.0"/>
+                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="400.0"/>
+                    <TableColumn fx:id="authorColumn" text="Автор" prefWidth="150.0"/>
+                    <TableColumn fx:id="statusColumn" text="Статус" prefWidth="100.0"/>
+                    <TableColumn fx:id="viewsColumn" text="Просмотры" prefWidth="100.0"/>
+                </columns>
+            </TableView>
+
+            <!-- Панель создания новой темы -->
+            <VBox fx:id="createThreadPane" spacing="10.0" visible="false" managed="false"
+                  styleClass="create-thread-pane">
+                <Label text="Создание новой темы" styleClass="section-label"/>
+                <TextField fx:id="newThreadTitleArea" promptText="Заголовок темы"/>
+                <TextArea fx:id="newThreadContentArea" promptText="Содержание темы"
+                          prefHeight="150.0"/>
+                <ComboBox fx:id="categoryComboBox" promptText="Выберите категорию"/>
+                <Button text="Опубликовать" onAction="#onSubmitNewThreadClick"
+                        styleClass="primary-button"/>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
