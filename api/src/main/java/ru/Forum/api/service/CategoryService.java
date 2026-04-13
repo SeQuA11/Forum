@@ -40,6 +40,28 @@ public class CategoryService {
         return convertToDTO(categoryRepository.save(category));
     }
 
+    @Transactional
+    public CategoryDTO update(Long id, CategoryDTO dto) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Категория не найдена: " + id));
+
+        category.setName(dto.getName());
+        category.setDescription(dto.getDescription());
+        category.setSlug(dto.getSlug());
+        category.setSortOrder(dto.getSortOrder());
+        category.setIsActive(dto.getIsActive());
+
+        return convertToDTO(categoryRepository.save(category));
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        if (!categoryRepository.existsById(id)) {
+            throw new RuntimeException("Категория не найдена: " + id);
+        }
+        categoryRepository.deleteById(id);
+    }
+
     private CategoryDTO convertToDTO(Category category) {
         CategoryDTO dto = new CategoryDTO();
         dto.setId(category.getId());
