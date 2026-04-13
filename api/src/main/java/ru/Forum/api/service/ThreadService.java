@@ -56,14 +56,13 @@ public class ThreadService {
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Категория не найдена"));
 
-        Thread thread = Thread.builder()
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .category(category)
-                .author(author)
-                .status(ThreadStatus.ACTIVE)
-                .viewsCount(0)
-                .build();
+        Thread thread = new Thread();
+        thread.setTitle(dto.getTitle());
+        thread.setContent(dto.getContent());
+        thread.setCategory(category);
+        thread.setAuthor(author);
+        thread.setStatus(ThreadStatus.ACTIVE);
+        thread.setViewsCount(0);
 
         return convertToDTO(threadRepository.save(thread));
     }

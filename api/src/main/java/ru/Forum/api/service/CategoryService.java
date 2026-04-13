@@ -30,13 +30,12 @@ public class CategoryService {
 
     @Transactional
     public CategoryDTO create(CategoryDTO dto) {
-        Category category = Category.builder()
-                .name(dto.getName())
-                .description(dto.getDescription())
-                .slug(dto.getSlug())
-                .sortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0)
-                .isActive(dto.getIsActive() != null ? dto.getIsActive() : true)
-                .build();
+        Category category = new Category();
+        category.setName(dto.getName());
+        category.setDescription(dto.getDescription());
+        category.setSlug(dto.getSlug());
+        category.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
+        category.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
 
         return convertToDTO(categoryRepository.save(category));
     }

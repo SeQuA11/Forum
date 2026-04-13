@@ -22,6 +22,10 @@ public class ThreadController {
 
     private final ThreadService threadService;
 
+    public ThreadController(ThreadService threadService) {
+        this.threadService = threadService;
+    }
+
     @GetMapping
     @Operation(summary = "Получить список активных тем")
     @ApiResponse(responseCode = "200", description = "Список тем")

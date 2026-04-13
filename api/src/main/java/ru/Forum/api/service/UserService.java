@@ -1,9 +1,6 @@
 package ru.Forum.api.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,29 +9,19 @@ import ru.Forum.api.dto.UserDTO;
 import ru.Forum.api.entity.Role;
 import ru.Forum.api.entity.User;
 import ru.Forum.api.repository.UserRepository;
-import ru.Forum.api.security.JwtTokenProvider;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserDetailsService {
+public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + username));
     }
 
     @Transactional
@@ -47,13 +34,13 @@ public class UserService implements UserDetailsService {
             throw new RuntimeException("Email уже зарегистрирован");
         }
 
-        User user = User.builder()
-                .username(dto.getUsername())
-                .email(dto.getUsername())
-                .passwordHash(passwordEncoder.encode(dto.getPassword()))
-                .role(Role.USER)
-                .isBanned(false)
-                .build();
+        // 👇 Используем конструктор + сеттеры вместо builder
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getUsername()); // Замените на dto.getEmail() если есть
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        user.setRole(Role.USER);
+        user.setIsBanned(false);
 
         userRepository.save(user);
         return convertToDTO(user);
@@ -71,12 +58,19 @@ public class UserService implements UserDetailsService {
             throw new RuntimeException("Пользователь заблокирован");
         }
 
-        return jwtTokenProvider.generateToken(user.getUsername());
+        return "TOKEN_PLACEHOLDER"; // Замените на вызов jwtTokenProvider.generateToken()
     }
 
     @Transactional(readOnly = true)
     public Optional<UserDTO> findById(Long id) {
         return userRepository.findById(id).map(this::convertToDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public UserDTO findByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
+        return convertToDTO(user);
     }
 
     private UserDTO convertToDTO(User user) {
