@@ -1,11 +1,13 @@
 package ru.forum.forumd;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ApiService {
@@ -58,6 +60,12 @@ public class ApiService {
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == 200) {
+            // Настраиваем ObjectMapper игнорировать неизвестные свойства
+            objectMapper.configure(
+                    com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                    false
+            );
+
             return objectMapper.readValue(response.body(),
                     objectMapper.getTypeFactory().constructCollectionType(List.class, CategoryDTO.class));
         } else {
@@ -79,12 +87,16 @@ public class ApiService {
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == 200) {
-            String body = response.body();
-            int startIndex = body.indexOf("\"content\":") + 11;
-            int endIndex = body.indexOf("]", startIndex) + 1;
-            String contentJson = body.substring(startIndex, endIndex);
+            // Парсим Page ответ
+            JsonNode rootNode = objectMapper.readTree(response.body());
+            JsonNode contentNode = rootNode.path("content");
 
-            return objectMapper.readValue(contentJson,
+            objectMapper.configure(
+                    com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                    false
+            );
+
+            return objectMapper.readValue(contentNode.toString(),
                     objectMapper.getTypeFactory().constructCollectionType(List.class, ThreadDTO.class));
         } else {
             throw new Exception("Ошибка получения тем: " + response.body());
@@ -101,12 +113,16 @@ public class ApiService {
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() == 200) {
-            String body = response.body();
-            int startIndex = body.indexOf("\"content\":") + 11;
-            int endIndex = body.indexOf("]", startIndex) + 1;
-            String contentJson = body.substring(startIndex, endIndex);
+            // Парсим Page ответ
+            JsonNode rootNode = objectMapper.readTree(response.body());
+            JsonNode contentNode = rootNode.path("content");
 
-            return objectMapper.readValue(contentJson,
+            objectMapper.configure(
+                    com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                    false
+            );
+
+            return objectMapper.readValue(contentNode.toString(),
                     objectMapper.getTypeFactory().constructCollectionType(List.class, ThreadDTO.class));
         } else {
             throw new Exception("Ошибка получения тем: " + response.body());

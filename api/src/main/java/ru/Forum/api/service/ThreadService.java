@@ -17,6 +17,7 @@ import ru.Forum.api.repository.CategoryRepository;
 import ru.Forum.api.repository.ThreadRepository;
 import ru.Forum.api.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,6 +71,8 @@ public class ThreadService {
         thread.setAuthor(author);
         thread.setStatus(ThreadStatus.ACTIVE);
         thread.setViewsCount(0);
+        thread.setCreatedAt(LocalDateTime.now());
+        thread.setUpdatedAt(LocalDateTime.now());  // ВАЖНО!
 
         return convertToDTO(threadRepository.save(thread));
     }
