@@ -33,11 +33,15 @@
                 <Label text="Категории" styleClass="section-label"/>
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <Button text="+" onAction="#onCreateCategoryClick" styleClass="small-button" maxWidth="30">
+                <!-- Кнопка создания категории -->
+                <Button fx:id="createCategoryButton" text="➕ Категория" onAction="#onCreateCategoryClick"
+                        styleClass="small-button" maxWidth="150">
                     <tooltip><Tooltip text="Создать категорию"/></tooltip>
                 </Button>
 
-                <Button text="🗑️" onAction="#onDeleteCategoryClick" styleClass="small-button danger-button" maxWidth="30">
+                <!-- Кнопка удаления категории (красная, как у тем) -->
+                <Button fx:id="deleteCategoryButton" text="❌ Удалить категорию" onAction="#onDeleteCategoryClick"
+                        styleClass="danger-button" maxWidth="180">
                     <tooltip><Tooltip text="Удалить категорию"/></tooltip>
                 </Button>
             </HBox>
@@ -68,10 +72,13 @@
 
                 <Button text="🔄 Обновить" onAction="#onRefreshClick" styleClass="refresh-button"/>
                 <Button text="➕ Создать тему" onAction="#onCreateThreadClick" styleClass="primary-button"/>
-                <Button text="🗑️ Удалить тему" onAction="#onDeleteThreadClick" styleClass="danger-button"/>
+
+                <!-- КНОПКА УДАЛЕНИЯ ТЕМ (для модераторов и админов) -->
+                <Button fx:id="deleteThreadButton" text="❌ Удалить тему" onAction="#onDeleteThreadClick"
+                        styleClass="danger-button"/>
             </HBox>
 
-            <!-- Панель модерации -->
+            <!-- Панель модерации (видна только модераторам/админам) -->
             <HBox fx:id="moderationPanel" spacing="10.0" visible="false" managed="false" alignment="CENTER_RIGHT">
                 <Label text="Модерация выбранной темы:" styleClass="small-label"/>
                 <Button text="📌 Закрепить" onAction="#onPinThreadClick" styleClass="small-button"/>

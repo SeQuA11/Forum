@@ -1,6 +1,9 @@
 package ru.forum.forumd.controller;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import ru.forum.forumd.service.ApiService;
@@ -58,9 +61,13 @@ public class LoginController {
             System.out.println("Попытка входа: " + username);
             AuthResponse response = ApiService.login(username, password);
 
-            System.out.println("Вход успешен! Токен: " +
-                    (response.getToken() != null ? response.getToken().substring(0, 20) + "..." : "null"));
+            System.out.println("✓ Вход успешен!");
+            System.out.println("  Токен: " + (response.getToken() != null ? "получен" : "нет"));
+            System.out.println("  Роль: " + response.getRole());
+            System.out.println("  ID: " + response.getUserId());
+            System.out.println("  Username: " + response.getUsername());
 
+            // Сохраняем данные
             HelloApplication.jwtToken = response.getToken();
             HelloApplication.currentUserRole = response.getRole();
             HelloApplication.currentUserId = response.getUserId();
@@ -68,10 +75,37 @@ public class LoginController {
 
             errorLabel.setText("");
 
-            HelloApplication.setRootWithSize("forum-view", 1200, 800);
+            // Принудительно создаем новую сцену
+            javafx.application.Platform.runLater(() -> {
+                try {
+                    System.out.println("Загрузка forum-view.fxml...");
+                    FXMLLoader loader = new FXMLLoader(
+                            HelloApplication.class.getResource("forum-view.fxml")
+                    );
+                    Parent root = loader.load();
+
+                    System.out.println("FXML загружен, создаем сцену...");
+                    Scene scene = new Scene(root, 1200, 800);
+                    scene.getStylesheets().add(
+                            HelloApplication.class.getResource("styles.css").toExternalForm()
+                    );
+
+                    var stage = HelloApplication.getPrimaryStage();
+                    stage.setScene(scene);
+                    stage.setTitle("Форум с модерацией");
+                    stage.show();
+
+                    System.out.println("✓ Переход на форум выполнен!");
+
+                } catch (Exception e) {
+                    System.err.println("✗ Ошибка при загрузке форума: " + e.getMessage());
+                    e.printStackTrace();
+                    errorLabel.setText("Ошибка загрузки форума: " + e.getMessage());
+                }
+            });
 
         } catch (Exception e) {
-            System.err.println("Ошибка входа: " + e.getMessage());
+            System.err.println("✗ Ошибка входа: " + e.getMessage());
             e.printStackTrace();
             errorLabel.setText("Ошибка: " + e.getMessage());
         }
@@ -95,27 +129,52 @@ public class LoginController {
             registerErrorLabel.setText("Заполните все поля!");
             return;
         }
-
         if (password.length() < 8) {
             registerErrorLabel.setText("Пароль должен быть не менее 8 символов!");
             return;
         }
 
+        registerErrorLabel.setText("Регистрация...");
+
         try {
+            System.out.println("Регистрация: " + username);
             ApiService.register(username, password);
+            System.out.println("✓ Регистрация успешна!");
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Регистрация успешна");
-            alert.setHeaderText(null);
-            alert.setContentText("Пользователь зарегистрирован! Теперь вы можете войти.");
-            alert.showAndWait();
+            // Автоматический вход
+            System.out.println("Автоматический вход...");
+            AuthResponse response = ApiService.login(username, password);
 
-            registerForm.setVisible(false);
-            registerForm.setManaged(false);
-            loginForm.setVisible(true);
-            loginForm.setManaged(true);
-            registerErrorLabel.setText("");
-            usernameField.setText(username);
+            HelloApplication.jwtToken = response.getToken();
+            HelloApplication.currentUserRole = response.getRole();
+            HelloApplication.currentUserId = response.getUserId();
+            HelloApplication.currentUsername = response.getUsername();
+
+            // Переход на форум
+            javafx.application.Platform.runLater(() -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(
+                            HelloApplication.class.getResource("forum-view.fxml")
+                    );
+                    Parent root = loader.load();
+
+                    Scene scene = new Scene(root, 1200, 800);
+                    scene.getStylesheets().add(
+                            HelloApplication.class.getResource("styles.css").toExternalForm()
+                    );
+
+                    var stage = HelloApplication.getPrimaryStage();
+                    stage.setScene(scene);
+                    stage.setTitle("Форум с модерацией");
+                    stage.show();
+
+                    System.out.println("✓ Переход на форум после регистрации выполнен!");
+
+                } catch (Exception e) {
+                    System.err.println("✗ Ошибка: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            });
 
         } catch (Exception e) {
             registerErrorLabel.setText("Ошибка: " + e.getMessage());

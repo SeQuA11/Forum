@@ -45,6 +45,9 @@ public class ThreadDetailController {
     private VBox moderationPanel;
 
     @FXML
+    private Label threadDescriptionLabel;
+
+    @FXML
     private ComboBox<String> statusComboBox;
 
     private Long currentThreadId;
@@ -61,9 +64,16 @@ public class ThreadDetailController {
         this.currentThreadId = thread.getId();
 
         threadTitleLabel.setText(thread.getTitle());
-        threadAuthorLabel.setText("Автор: " + thread.getAuthorUsername());
-        threadStatusLabel.setText("Статус: " + thread.getStatus());
-        threadViewsLabel.setText("Просмотры: " + thread.getViewsCount());
+
+        // 🆕 Устанавливаем описание (контент) темы
+        String content = thread.getContent();
+        threadDescriptionLabel.setText(content != null && !content.isEmpty()
+                ? content
+                : "Описание отсутствует");
+
+        threadAuthorLabel.setText("👤 Автор: " + thread.getAuthorUsername());
+        threadStatusLabel.setText("🏷️ Статус: " + thread.getStatus());
+        threadViewsLabel.setText("👁️ Просмотры: " + thread.getViewsCount());
 
         // Показываем панель модерации только для модераторов и админов
         String role = HelloApplication.currentUserRole;
@@ -162,13 +172,12 @@ public class ThreadDetailController {
         try {
             System.out.println("Возврат к списку тем...");
 
-            // Загружаем forum-view
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("forum-view.fxml"));
+            // 🔧 ИСПРАВЛЕНИЕ: используем HelloApplication.class для поиска FXML
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("forum-view.fxml"));
             Parent root = loader.load();
 
-            // Создаём новую сцену
             Scene scene = new Scene(root, 1200, 800);
-            scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
+            scene.getStylesheets().add(HelloApplication.class.getResource("styles.css").toExternalForm());
 
             Stage stage = HelloApplication.getPrimaryStage();
             stage.setScene(scene);
@@ -177,12 +186,6 @@ public class ThreadDetailController {
         } catch (Exception e) {
             System.err.println("Ошибка при возврате: " + e.getMessage());
             e.printStackTrace();
-
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Ошибка");
-            alert.setHeaderText(null);
-            alert.setContentText("Не удалось вернуться: " + e.getMessage());
-            alert.showAndWait();
         }
     }
 

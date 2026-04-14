@@ -20,10 +20,18 @@ import ru.forum.forumd.service.ApiService;
 
 import java.util.List;
 
+import static javax.swing.SwingUtilities.getRoot;
+
 public class ForumController {
 
     @FXML
     private Label welcomeLabel;
+
+    @FXML
+    private Button deleteCategoryButton;
+
+    @FXML
+    private Button deleteThreadButton;
 
     @FXML
     private Label roleLabel;
@@ -77,30 +85,54 @@ public class ForumController {
     private ObservableList<ThreadDTO> threads = FXCollections.observableArrayList();
     private CategoryDTO selectedCategory = null;
 
+    @FXML private Button createCategoryButton;
+
     @FXML
     public void initialize() {
-        // Настраиваем таблицу тем
+        // Настройка таблицы
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         authorColumn.setCellValueFactory(new PropertyValueFactory<>("authorUsername"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
         viewsColumn.setCellValueFactory(new PropertyValueFactory<>("viewsCount"));
 
-        // Загружаем данные
         loadCategories();
         loadThreads();
 
-        // Показываем имя пользователя и роль
         if (HelloApplication.currentUsername != null) {
             welcomeLabel.setText("Добро пожаловать, " + HelloApplication.currentUsername + "!");
             roleLabel.setText("Роль: " + HelloApplication.currentUserRole);
 
-            // Показываем админ-панель для модераторов и админов
-            if ("ROLE_MODERATOR".equals(HelloApplication.currentUserRole) ||
-                    "ROLE_ADMIN".equals(HelloApplication.currentUserRole)) {
-                adminPanel.setVisible(true);
-                adminPanel.setManaged(true);
+            // Проверяем права
+            boolean isModOrAdmin = "ROLE_MODERATOR".equals(HelloApplication.currentUserRole) ||
+                    "ROLE_ADMIN".equals(HelloApplication.currentUserRole);
+
+            System.out.println("Проверка прав: isModOrAdmin = " + isModOrAdmin);
+
+            // Скрываем кнопки управления категориями для обычных пользователей
+            if (createCategoryButton != null) {
+                createCategoryButton.setVisible(isModOrAdmin);
+                createCategoryButton.setManaged(isModOrAdmin);
             }
+            if (deleteCategoryButton != null) {
+                deleteCategoryButton.setVisible(isModOrAdmin);
+                deleteCategoryButton.setManaged(isModOrAdmin);
+            }
+
+            // ПОКАЗЫВАЕМ кнопку удаления тем для модераторов/админов
+            if (deleteThreadButton != null) {
+                deleteThreadButton.setVisible(isModOrAdmin);
+                deleteThreadButton.setManaged(isModOrAdmin);
+                System.out.println("Кнопка удаления тем: visible = " + isModOrAdmin);
+            }
+
+            // Показываем админ-панель
+            if (adminPanel != null) {
+                adminPanel.setVisible(isModOrAdmin);
+                adminPanel.setManaged(isModOrAdmin);
+            }
+
+
         }
 
         // Обработчик выбора категории
@@ -211,25 +243,39 @@ public class ForumController {
     private void onLogoutClick() {
         System.out.println("Выход из системы...");
 
+        // Очищаем данные пользователя
         HelloApplication.jwtToken = null;
         HelloApplication.currentUserRole = null;
         HelloApplication.currentUserId = null;
         HelloApplication.currentUsername = null;
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("login-view.fxml"));
+            // Используем правильный путь к ресурсу
+            FXMLLoader loader = new FXMLLoader(
+                    HelloApplication.class.getResource("login-view.fxml")
+            );
             Parent root = loader.load();
 
             Scene scene = new Scene(root, 800, 600);
-            scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
+            scene.getStylesheets().add(
+                    HelloApplication.class.getResource("styles.css").toExternalForm()
+            );
 
             Stage stage = HelloApplication.getPrimaryStage();
             stage.setScene(scene);
             stage.setTitle("Форум с модерацией - Вход");
 
+            System.out.println("Выход выполнен успешно");
+
         } catch (Exception e) {
             System.err.println("Ошибка при выходе: " + e.getMessage());
             e.printStackTrace();
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Ошибка");
+            alert.setHeaderText(null);
+            alert.setContentText("Не удалось выйти: " + e.getMessage());
+            alert.showAndWait();
         }
     }
 
@@ -406,14 +452,15 @@ public class ForumController {
         if (selectedThread == null) return;
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("thread-detail-view.fxml"));
+            // 🔧 ИСПРАВЛЕНИЕ: используем HelloApplication.class, так как FXML лежат в его пакете
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("thread-detail-view.fxml"));
             Parent root = loader.load();
 
             ThreadDetailController controller = loader.getController();
             controller.setThreadData(selectedThread);
 
             Scene scene = new Scene(root, 1200, 800);
-            scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
+            scene.getStylesheets().add(HelloApplication.class.getResource("styles.css").toExternalForm());
 
             Stage stage = HelloApplication.getPrimaryStage();
             stage.setScene(scene);
