@@ -1,4 +1,4 @@
-package ru.forum.forumd;
+package ru.forum.forumd.response;
 
 public class AuthResponse {
     private String token;

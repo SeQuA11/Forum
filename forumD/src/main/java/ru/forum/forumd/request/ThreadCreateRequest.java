@@ -1,4 +1,4 @@
-package ru.forum.forumd;
+package ru.forum.forumd.request;
 
 public class ThreadCreateRequest {
     private String title;

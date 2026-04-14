@@ -1,13 +1,20 @@
-package ru.forum.forumd;
+package ru.forum.forumd.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ru.forum.forumd.response.AuthResponse;
+import ru.forum.forumd.HelloApplication;
+import ru.forum.forumd.dto.CategoryDTO;
+import ru.forum.forumd.dto.PostDTO;
+import ru.forum.forumd.dto.ThreadDTO;
+import ru.forum.forumd.request.AuthRequest;
+import ru.forum.forumd.request.PostCreateRequest;
+import ru.forum.forumd.request.ThreadCreateRequest;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ApiService {
@@ -146,6 +153,83 @@ public class ApiService {
             return objectMapper.readValue(response.body(), ThreadDTO.class);
         } else {
             throw new Exception("Ошибка создания темы: " + response.body());
+        }
+    }
+
+    public static List<PostDTO> getPostsByThread(Long threadId) throws Exception {
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(HelloApplication.API_BASE_URL + "/threads/" + threadId + "/posts"))
+                .header("Authorization", "Bearer " + HelloApplication.jwtToken)
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            JsonNode rootNode = objectMapper.readTree(response.body());
+            JsonNode contentNode = rootNode.path("content");
+
+            objectMapper.configure(
+                    com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                    false
+            );
+
+            return objectMapper.readValue(contentNode.toString(),
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, PostDTO.class));
+        } else {
+            throw new Exception("Ошибка получения сообщений: " + response.body());
+        }
+    }
+
+    public static PostDTO createPost(String content, Long threadId) throws Exception {
+        PostCreateRequest request = new PostCreateRequest(content, threadId);
+        String json = objectMapper.writeValueAsString(request);
+
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(HelloApplication.API_BASE_URL + "/threads/" + threadId + "/posts"))
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + HelloApplication.jwtToken)
+                .build();
+
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 201) {
+            return objectMapper.readValue(response.body(), PostDTO.class);
+        } else {
+            throw new Exception("Ошибка создания сообщения: " + response.body());
+        }
+    }
+
+    // ========== MODERATION ==========
+
+    public static ThreadDTO updateThreadStatus(Long threadId, String status) throws Exception {
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(HelloApplication.API_BASE_URL + "/threads/" + threadId + "/status?status=" + status))
+                .method("PATCH", HttpRequest.BodyPublishers.noBody())
+                .header("Authorization", "Bearer " + HelloApplication.jwtToken)
+                .build();
+
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            return objectMapper.readValue(response.body(), ThreadDTO.class);
+        } else {
+            throw new Exception("Ошибка изменения статуса: " + response.body());
+        }
+    }
+
+    public static void deleteThread(Long threadId) throws Exception {
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(HelloApplication.API_BASE_URL + "/threads/" + threadId))
+                .DELETE()
+                .header("Authorization", "Bearer " + HelloApplication.jwtToken)
+                .build();
+
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new Exception("Ошибка удаления темы: " + response.body());
         }
     }
 }

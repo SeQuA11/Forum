@@ -1,4 +1,4 @@
-package ru.forum.forumd;
+package ru.forum.forumd.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

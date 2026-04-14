@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="ru.forum.forumd.controller.ThreadDetailController"
+            stylesheets="@styles.css">
+
+    <!-- Верхняя панель -->
+    <top>
+        <VBox spacing="10.0" styleClass="top-bar">
+            <padding>
+                <Insets bottom="15.0" left="20.0" right="20.0" top="15.0"/>
+            </padding>
+
+            <Button text="← Назад к списку" onAction="#onBackClick" styleClass="back-button"/>
+
+            <VBox spacing="5.0">
+                <Label fx:id="threadTitleLabel" styleClass="thread-title-label"/>
+                <HBox spacing="20.0">
+                    <Label fx:id="threadAuthorLabel" styleClass="thread-info-label"/>
+                    <Label fx:id="threadStatusLabel" styleClass="thread-info-label"/>
+                    <Label fx:id="threadViewsLabel" styleClass="thread-info-label"/>
+                </HBox>
+            </VBox>
+
+            <!-- Панель модерации -->
+            <VBox fx:id="moderationPanel" spacing="10.0" styleClass="moderation-panel">
+                <Label text="Модерация темы" styleClass="section-label"/>
+                <HBox spacing="10.0">
+                    <Label text="Изменить статус:"/>
+                    <ComboBox fx:id="statusComboBox"/>
+                    <Button text="Применить" onAction="#onChangeStatusClick" styleClass="primary-button"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </top>
+
+    <!-- Сообщения -->
+    <center>
+        <ScrollPane fitToWidth="true">
+            <VBox fx:id="postsContainer" spacing="5.0"/>
+        </ScrollPane>
+    </center>
+
+    <!-- Форма нового сообщения -->
+    <bottom>
+        <VBox spacing="10.0" styleClass="new-post-panel">
+            <padding>
+                <Insets bottom="15.0" left="20.0" right="20.0" top="15.0"/>
+            </padding>
+
+            <Label text="Ваш ответ:" styleClass="section-label"/>
+            <TextArea fx:id="newPostArea" prefHeight="100.0" promptText="Введите ваше сообщение..."/>
+            <Button fx:id="submitPostButton" text="Отправить" onAction="#onSubmitPostClick"
+                    styleClass="primary-button" maxWidth="200"/>
+        </VBox>
+    </bottom>
+</BorderPane>

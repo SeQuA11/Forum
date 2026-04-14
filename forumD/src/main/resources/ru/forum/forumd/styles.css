@@ -141,3 +141,40 @@
     -fx-border-radius: 4;
     -fx-background-radius: 4;
 }
+
+
+.thread-title-label {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.thread-info-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.moderation-panel {
+    -fx-background-color: #fff3cd;
+    -fx-border-color: #ffc107;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 15;
+}
+
+.new-post-panel {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1 0 0 0;
+}
+
+.back-button {
+    -fx-background-color: #6c757d;
+    -fx-text-fill: white;
+    -fx-padding: 8 16;
+    -fx-background-radius: 4;
+}
+
+.back-button:hover {
+    -fx-background-color: #5a6268;
+}

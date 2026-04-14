@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="ru.forum.forumd.ForumController"
+            fx:controller="ru.forum.forumd.controller.ForumController"
             stylesheets="@styles.css">
 
     <!-- Верхняя панель -->
@@ -48,7 +48,7 @@
                 <Button text="Создать тему" onAction="#onCreateThreadClick" styleClass="primary-button"/>
             </HBox>
 
-            <TableView fx:id="threadsTableView" VBox.vgrow="ALWAYS">
+            <TableView fx:id="threadsTableView" VBox.vgrow="ALWAYS" onMouseClicked="#onThreadDoubleClick">
                 <columns>
                     <TableColumn fx:id="idColumn" text="ID" prefWidth="50.0"/>
                     <TableColumn fx:id="titleColumn" text="Название" prefWidth="400.0"/>

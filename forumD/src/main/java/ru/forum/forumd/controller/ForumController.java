@@ -1,11 +1,19 @@
-package ru.forum.forumd;
+package ru.forum.forumd.controller;
 
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import ru.forum.forumd.service.ApiService;
+import ru.forum.forumd.HelloApplication;
+import ru.forum.forumd.dto.CategoryDTO;
+import ru.forum.forumd.dto.ThreadDTO;
 
 import java.util.List;
 
@@ -188,5 +196,40 @@ public class ForumController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void onThreadDoubleClick(javafx.scene.input.MouseEvent event) {
+        // Проверяем, что выбрана тема и был двойной клик
+        if (event.getClickCount() != 2) return;
+
+        ThreadDTO selectedThread = threadsTableView.getSelectionModel().getSelectedItem();
+        if (selectedThread == null) return;
+
+        try {
+            // 1. Создаём загрузчик
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("thread-detail-view.fxml"));
+
+            // 2. СНАЧАЛА загружаем FXML
+            Parent root = loader.load();
+
+            // 3. ТОЛЬКО ПОСЛЕ load() получаем контроллер
+            ThreadDetailController controller = loader.getController();
+
+            // 4. Передаём данные
+            controller.setThreadData(selectedThread);
+
+            // 5. Создаём новую сцену и переключаемся
+            Scene scene = new Scene(root, 1200, 800);
+            scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
+
+            Stage stage = HelloApplication.getPrimaryStage();
+            stage.setScene(scene);
+            stage.setTitle("Тема: " + selectedThread.getTitle());
+
+        } catch (Exception e) {
+            showError("Ошибка открытия темы: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

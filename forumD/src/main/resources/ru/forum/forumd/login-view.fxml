@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 
 <VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="ru.forum.forumd.LoginController"
+      fx:controller="ru.forum.forumd.controller.LoginController"
       stylesheets="@styles.css">
 
     <padding>

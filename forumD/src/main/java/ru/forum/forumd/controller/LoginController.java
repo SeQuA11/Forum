@@ -1,8 +1,11 @@
-package ru.forum.forumd;
+package ru.forum.forumd.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import ru.forum.forumd.service.ApiService;
+import ru.forum.forumd.response.AuthResponse;
+import ru.forum.forumd.HelloApplication;
 
 public class LoginController {
 
