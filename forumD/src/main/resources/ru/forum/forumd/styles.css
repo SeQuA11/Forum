@@ -178,3 +178,97 @@
 .back-button:hover {
     -fx-background-color: #5a6268;
 }
+
+.small-button {
+    -fx-font-size: 16px;
+    -fx-padding: 5 8;
+    -fx-min-width: 30;
+    -fx-max-width: 30;
+}
+
+.danger-button {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+}
+
+.danger-button:hover {
+    -fx-background-color: #c0392b;
+}
+
+.refresh-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+.refresh-button:hover {
+    -fx-background-color: #2980b9;
+}
+
+/* Панель администратора */
+.admin-panel {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 10;
+}
+
+.admin-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-text-fill: #495057;
+}
+
+.admin-button {
+    -fx-background-color: #6c757d;
+    -fx-text-fill: white;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.admin-button:hover {
+    -fx-background-color: #5a6268;
+}
+
+/* Панель создания темы */
+.create-thread-pane {
+    -fx-background-color: white;
+    -fx-border-color: #3498db;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
+}
+
+.close-button {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.close-button:hover {
+    -fx-background-color: #c0392b;
+}
+
+/* Поля ввода */
+.input-field, .input-area, .combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #ced4da;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 8;
+}
+
+.input-field:focused, .input-area:focused, .combo-box:focused {
+    -fx-border-color: #3498db;
+    -fx-effect: dropshadow(gaussian, rgba(52, 152, 219, 0.3), 5, 0, 0, 2);
+}
+
+/* Строка статуса */
+.status-bar {
+    -fx-background-color: #34495e;
+}
+
+.status-label, .info-label {
+    -fx-text-fill: #ecf0f1;
+    -fx-font-size: 12px;
+}

@@ -232,4 +232,43 @@ public class ApiService {
             throw new Exception("Ошибка удаления темы: " + response.body());
         }
     }
+
+    public static void deleteCategory(Long categoryId) throws Exception {
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(HelloApplication.API_BASE_URL + "/categories/" + categoryId))
+                .DELETE()
+                .header("Authorization", "Bearer " + HelloApplication.jwtToken)
+                .build();
+
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new Exception("Ошибка удаления категории: " + response.body());
+        }
+    }
+
+    // Метод создания категории:
+    public static CategoryDTO createCategory(String name, String description, String slug,
+                                             Integer sortOrder, Boolean isActive) throws Exception {
+        // Создайте CategoryCreateRequest класс или используйте CategoryDTO
+        String json = String.format(
+                "{\"name\":\"%s\",\"description\":\"%s\",\"slug\":\"%s\",\"sortOrder\":%d,\"isActive\":%b}",
+                name, description, slug, sortOrder != null ? sortOrder : 0, isActive != null ? isActive : true
+        );
+
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(HelloApplication.API_BASE_URL + "/categories"))
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + HelloApplication.jwtToken)
+                .build();
+
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 201) {
+            return objectMapper.readValue(response.body(), CategoryDTO.class);
+        } else {
+            throw new Exception("Ошибка создания категории: " + response.body());
+        }
+    }
 }

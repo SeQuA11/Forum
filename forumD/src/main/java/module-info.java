@@ -4,6 +4,7 @@ module ru.forum.forumd {
     requires java.net.http;
     requires com.fasterxml.jackson.databind;
     requires org.controlsfx.controls;
+    requires java.desktop;
 
     opens ru.forum.forumd to javafx.fxml;
     exports ru.forum.forumd;

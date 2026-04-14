@@ -24,13 +24,34 @@
 
     <!-- Левая панель с категориями -->
     <left>
-        <VBox spacing="10.0" styleClass="sidebar" prefWidth="250.0">
+        <VBox spacing="10.0" styleClass="sidebar" prefWidth="300.0">
             <padding>
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
             </padding>
 
-            <Label text="Категории" styleClass="section-label"/>
+            <HBox alignment="CENTER_LEFT" spacing="5.0">
+                <Label text="Категории" styleClass="section-label"/>
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="+" onAction="#onCreateCategoryClick" styleClass="small-button" maxWidth="30">
+                    <tooltip><Tooltip text="Создать категорию"/></tooltip>
+                </Button>
+
+                <Button text="🗑️" onAction="#onDeleteCategoryClick" styleClass="small-button danger-button" maxWidth="30">
+                    <tooltip><Tooltip text="Удалить категорию"/></tooltip>
+                </Button>
+            </HBox>
+
             <ListView fx:id="categoryListView" VBox.vgrow="ALWAYS"/>
+
+            <!-- Панель управления для модераторов/админов -->
+            <VBox fx:id="adminPanel" spacing="5.0" visible="false" managed="false" styleClass="admin-panel">
+                <Separator/>
+                <Label text="Панель управления" styleClass="admin-label"/>
+                <Button text="📊 Статистика" maxWidth="Infinity" styleClass="admin-button"/>
+                <Button text="👥 Пользователи" maxWidth="Infinity" styleClass="admin-button"/>
+                <Button text="⚙️ Настройки" maxWidth="Infinity" styleClass="admin-button"/>
+            </VBox>
         </VBox>
     </left>
 
@@ -44,31 +65,58 @@
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                 <Label text="Темы форума" styleClass="section-label"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="Обновить" onAction="#onRefreshClick"/>
-                <Button text="Создать тему" onAction="#onCreateThreadClick" styleClass="primary-button"/>
+
+                <Button text="🔄 Обновить" onAction="#onRefreshClick" styleClass="refresh-button"/>
+                <Button text="➕ Создать тему" onAction="#onCreateThreadClick" styleClass="primary-button"/>
+                <Button text="🗑️ Удалить тему" onAction="#onDeleteThreadClick" styleClass="danger-button"/>
             </HBox>
 
+            <!-- Панель модерации -->
+            <HBox fx:id="moderationPanel" spacing="10.0" visible="false" managed="false" alignment="CENTER_RIGHT">
+                <Label text="Модерация выбранной темы:" styleClass="small-label"/>
+                <Button text="📌 Закрепить" onAction="#onPinThreadClick" styleClass="small-button"/>
+                <Button text="🔒 Закрыть" onAction="#onCloseThreadClick" styleClass="small-button"/>
+                <Button text="👁️ Скрыть" onAction="#onHideThreadClick" styleClass="small-button"/>
+            </HBox>
+
+            <!-- Таблица тем -->
             <TableView fx:id="threadsTableView" VBox.vgrow="ALWAYS" onMouseClicked="#onThreadDoubleClick">
                 <columns>
                     <TableColumn fx:id="idColumn" text="ID" prefWidth="50.0"/>
-                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="400.0"/>
-                    <TableColumn fx:id="authorColumn" text="Автор" prefWidth="150.0"/>
+                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="350.0"/>
+                    <TableColumn fx:id="authorColumn" text="Автор" prefWidth="120.0"/>
                     <TableColumn fx:id="statusColumn" text="Статус" prefWidth="100.0"/>
-                    <TableColumn fx:id="viewsColumn" text="Просмотры" prefWidth="100.0"/>
+                    <TableColumn fx:id="viewsColumn" text="Просмотры" prefWidth="80.0"/>
                 </columns>
             </TableView>
 
             <!-- Панель создания новой темы -->
-            <VBox fx:id="createThreadPane" spacing="10.0" visible="false" managed="false"
-                  styleClass="create-thread-pane">
-                <Label text="Создание новой темы" styleClass="section-label"/>
-                <TextField fx:id="newThreadTitleArea" promptText="Заголовок темы"/>
-                <TextArea fx:id="newThreadContentArea" promptText="Содержание темы"
-                          prefHeight="150.0"/>
-                <ComboBox fx:id="categoryComboBox" promptText="Выберите категорию"/>
-                <Button text="Опубликовать" onAction="#onSubmitNewThreadClick"
-                        styleClass="primary-button"/>
+            <VBox fx:id="createThreadPane" spacing="10.0" visible="false" managed="false" styleClass="create-thread-pane">
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <Label text="Создание новой темы" styleClass="section-label"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="✕" onAction="#onCloseCreateThreadPane" styleClass="close-button" maxWidth="30"/>
+                </HBox>
+
+                <TextField fx:id="newThreadTitleArea" promptText="Заголовок темы" styleClass="input-field"/>
+                <TextArea fx:id="newThreadContentArea" promptText="Содержание темы" prefHeight="150.0" styleClass="input-area"/>
+                <HBox spacing="10.0">
+                    <ComboBox fx:id="categoryComboBox" promptText="Выберите категорию" HBox.hgrow="ALWAYS" styleClass="combo-box"/>
+                    <Button text="Опубликовать" onAction="#onSubmitNewThreadClick" styleClass="primary-button"/>
+                </HBox>
             </VBox>
         </VBox>
     </center>
+
+    <!-- Нижняя панель со статусом -->
+    <bottom>
+        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="status-bar">
+            <padding>
+                <Insets bottom="5.0" left="20.0" right="20.0" top="5.0"/>
+            </padding>
+            <Label fx:id="statusLabel" text="Готов к работе" styleClass="status-label"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="threadCountLabel" text="Тем: 0" styleClass="info-label"/>
+        </HBox>
+    </bottom>
 </BorderPane>

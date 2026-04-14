@@ -9,10 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.Forum.api.dto.ThreadCreateDTO;
 import ru.Forum.api.dto.ThreadResponseDTO;
-import ru.Forum.api.entity.Category;
+import ru.Forum.api.entity.*;
 import ru.Forum.api.entity.Thread;
-import ru.Forum.api.entity.ThreadStatus;
-import ru.Forum.api.entity.User;
 import ru.Forum.api.repository.CategoryRepository;
 import ru.Forum.api.repository.ThreadRepository;
 import ru.Forum.api.repository.UserRepository;
@@ -98,23 +96,6 @@ public class ThreadService {
         return convertToDTO(threadRepository.save(thread));
     }
 
-    @Transactional
-    public void delete(Long id, String username) {
-        Thread thread = threadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Тема не найдена: " + id));
-
-        User currentUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
-
-        // Проверка прав: только автор, модератор или админ могут удалять
-        if (!thread.getAuthor().getUsername().equals(username) &&
-                !currentUser.getRole().name().equals("MODERATOR") &&
-                !currentUser.getRole().name().equals("ADMIN")) {
-            throw new RuntimeException("Нет прав на удаление этой темы");
-        }
-
-        threadRepository.delete(thread);
-    }
 
     @Transactional
     public ThreadResponseDTO updateStatus(Long id, ThreadStatus status) {
@@ -132,6 +113,64 @@ public class ThreadService {
 
         thread.setViewsCount(thread.getViewsCount() + 1);
         return convertToDTO(thread);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ThreadResponseDTO> getActiveThreads(int page, int size, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        // Админы видят всё, модераторы не видят CLOSED, обычные пользователи видят только ACTIVE
+        Page<Thread> threads;
+        if (user.getRole() == Role.ADMIN) {
+            threads = threadRepository.findAll(pageable);
+        } else if (user.getRole() == Role.MODERATOR) {
+            threads = threadRepository.findByStatusNot(ThreadStatus.HIDDEN, pageable);
+        } else {
+            threads = threadRepository.findByStatus(ThreadStatus.ACTIVE, pageable);
+        }
+
+        return threads.map(this::convertToDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ThreadResponseDTO> getThreadsByCategory(Long categoryId, int page, int size, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<Thread> threads;
+        if (user.getRole() == Role.ADMIN) {
+            threads = threadRepository.findByCategoryId(categoryId, pageable);
+        } else if (user.getRole() == Role.MODERATOR) {
+            threads = threadRepository.findByCategoryIdAndStatusNot(categoryId, ThreadStatus.HIDDEN, pageable);
+        } else {
+            threads = threadRepository.findByCategoryIdAndStatus(categoryId, ThreadStatus.ACTIVE, pageable);
+        }
+
+        return threads.map(this::convertToDTO);
+    }
+
+    // Метод для удаления темы
+    @Transactional
+    public void delete(Long id, String username) {
+        Thread thread = threadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Тема не найдена: " + id));
+
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        // Удалять может: автор, модератор или админ
+        if (!thread.getAuthor().getUsername().equals(username) &&
+                currentUser.getRole() != Role.MODERATOR &&
+                currentUser.getRole() != Role.ADMIN) {
+            throw new RuntimeException("Нет прав на удаление этой темы");
+        }
+
+        threadRepository.delete(thread);
     }
 
     private ThreadResponseDTO convertToDTO(Thread thread) {
