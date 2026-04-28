@@ -30,13 +30,6 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
 
-    public AuthController(UserService userService, JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager, UserDetailsService userDetailsService) {
-        this.userService = userService;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.authenticationManager = authenticationManager;
-        this.userDetailsService = userDetailsService;
-    }
-
     @PostMapping("/register")
     @Operation(summary = "Регистрация нового пользователя")
     @ApiResponse(responseCode = "201", description = "Пользователь успешно зарегистрирован")

@@ -22,10 +22,6 @@ public class PostController {
 
     private final PostService postService;
 
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
-
     @GetMapping
     @Operation(summary = "Получить все сообщения темы")
     @ApiResponse(responseCode = "200", description = "Список сообщений")
