@@ -54,22 +54,30 @@ async function loadCategories() {
         categoryList.innerHTML = '<li data-id="all" class="active">Все категории</li>';
         threadCategory.innerHTML = '';
         
-        categories.forEach(cat => {
-            // Добавляем в список категорий
-            const li = document.createElement('li');
-            li.textContent = cat.name;
-            li.dataset.id = cat.id;
-            li.addEventListener('click', () => selectCategory(cat));
-            categoryList.appendChild(li);
-            
-            // Добавляем в select для создания темы
-            const option = document.createElement('option');
-            option.value = cat.id;
-            option.textContent = cat.name;
-            threadCategory.appendChild(option);
-        });
+        if (categories && categories.length > 0) {
+            categories.forEach(cat => {
+                // Добавляем в список категорий
+                const li = document.createElement('li');
+                li.textContent = cat.name;
+                li.dataset.id = cat.id;
+                li.addEventListener('click', () => selectCategory(cat));
+                categoryList.appendChild(li);
+                
+                // Добавляем в select для создания темы
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = cat.name;
+                threadCategory.appendChild(option);
+            });
+        } else {
+            categoryList.innerHTML += '<li class="no-data">Нет доступных категорий</li>';
+            threadCategory.innerHTML = '<option value="">Нет категорий</option>';
+        }
     } catch (error) {
-        showError('Ошибка загрузки категорий: ' + error.message);
+        console.error('Ошибка загрузки категорий:', error);
+        showError('Ошибка загрузки категорий: проверьте подключение к API');
+        const categoryList = document.getElementById('categoryList');
+        categoryList.innerHTML = '<li class="no-data">Ошибка загрузки</li>';
     }
 }
 
@@ -94,7 +102,10 @@ async function loadThreads() {
         const pageData = await ForumAPI.getThreads(0, 20);
         renderThreads(pageData.content || pageData);
     } catch (error) {
-        showError('Ошибка загрузки тем: ' + error.message);
+        console.error('Ошибка загрузки тем:', error);
+        showError('Ошибка загрузки тем: проверьте подключение к API');
+        const tbody = document.getElementById('threadsTableBody');
+        tbody.innerHTML = '<tr><td colspan="6" class="no-data">Ошибка загрузки тем</td></tr>';
     }
 }
 
@@ -103,7 +114,10 @@ async function loadThreadsByCategory(categoryId) {
         const pageData = await ForumAPI.getThreadsByCategory(categoryId, 0, 20);
         renderThreads(pageData.content || pageData);
     } catch (error) {
-        showError('Ошибка загрузки тем: ' + error.message);
+        console.error('Ошибка загрузки тем категории:', error);
+        showError('Ошибка загрузки тем: проверьте подключение к API');
+        const tbody = document.getElementById('threadsTableBody');
+        tbody.innerHTML = '<tr><td colspan="6" class="no-data">Ошибка загрузки тем</td></tr>';
     }
 }
 
@@ -111,14 +125,19 @@ function renderThreads(threads) {
     const tbody = document.getElementById('threadsTableBody');
     tbody.innerHTML = '';
     
+    if (!threads || threads.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="no-data">Темы не найдены</td></tr>';
+        return;
+    }
+    
     threads.forEach(thread => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${thread.id}</td>
             <td>${escapeHtml(thread.title)}</td>
-            <td>${escapeHtml(thread.authorUsername)}</td>
-            <td><span class="badge">${thread.status}</span></td>
-            <td>${thread.viewsCount}</td>
+            <td>${escapeHtml(thread.authorUsername || 'Неизвестно')}</td>
+            <td><span class="badge">${thread.status || 'ACTIVE'}</span></td>
+            <td>${thread.viewsCount || 0}</td>
             <td>${formatDate(thread.createdAt)}</td>
         `;
         tr.addEventListener('click', () => openThreadDetail(thread.id));
@@ -249,8 +268,12 @@ async function handleLogin(e) {
         document.getElementById('loginForm').reset();
         initAuth();
         showSuccess('Вход выполнен успешно!');
+        // Перезагружаем данные после входа
+        loadCategories();
+        loadThreads();
     } catch (error) {
-        showError('Ошибка входа: ' + error.message);
+        console.error('Ошибка входа:', error);
+        showError('Ошибка входа: проверьте логин/пароль или подключение к API');
     }
 }
 
@@ -266,7 +289,12 @@ async function handleRegister(e) {
         showSuccess('Регистрация успешна! Теперь войдите.');
         document.getElementById('loginModal').style.display = 'block';
     } catch (error) {
-        showError('Ошибка регистрации: ' + error.message);
+        console.error('Ошибка регистрации:', error);
+        if (error.message.includes('409')) {
+            showError('Ошибка регистрации: пользователь с таким именем уже существует');
+        } else {
+            showError('Ошибка регистрации: проверьте подключение к API');
+        }
     }
 }
 
@@ -401,12 +429,39 @@ function logout() {
 
 // ========== Утилиты ==========
 function showError(message) {
-    alert('Ошибка: ' + message);
-    console.error(message);
+    console.error('Error:', message);
+    // Создаем красивое уведомление об ошибке
+    const notification = document.createElement('div');
+    notification.className = 'notification error';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
 function showSuccess(message) {
-    alert(message);
+    console.log('Success:', message);
+    // Создаем красивое уведомление об успехе
+    const notification = document.createElement('div');
+    notification.className = 'notification success';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
 function escapeHtml(text) {

@@ -143,7 +143,7 @@ const ForumAPI = {
     async createPost(threadId, content) {
         return await this.request(`/threads/${threadId}/posts`, {
             method: 'POST',
-            body: JSON.stringify({ content, threadId })
+            body: JSON.stringify({ content })
         });
     }
 };
