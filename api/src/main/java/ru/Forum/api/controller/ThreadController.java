@@ -27,7 +27,6 @@ public class ThreadController {
         this.threadService = threadService;
     }
 
-
     @GetMapping("/{id}")
     @Operation(summary = "Получить тему по ID")
     @ApiResponse(responseCode = "200", description = "Данные темы")

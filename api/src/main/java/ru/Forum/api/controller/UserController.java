@@ -24,7 +24,6 @@ public class UserController {
         this.userService = userService;
     }
 
-
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Получить список всех пользователей (только админ)")

@@ -23,7 +23,6 @@ public class CategoryService {
         this.threadRepository = threadRepository;
     }
 
-
     @Transactional(readOnly = true)
     public List<CategoryDTO> getAllActiveCategories() {
         return categoryRepository.findByIsActiveTrueOrderBySortOrderAsc()

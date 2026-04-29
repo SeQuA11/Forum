@@ -33,7 +33,6 @@ public class ThreadService {
         this.userRepository = userRepository;
     }
 
-
     @Transactional(readOnly = true)
     public Page<ThreadResponseDTO> getActiveThreads(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());

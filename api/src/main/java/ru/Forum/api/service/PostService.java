@@ -32,7 +32,6 @@ public class PostService {
         this.userRepository = userRepository;
     }
 
-
     @Transactional(readOnly = true)
     public Page<PostResponseDTO> getPostsByThread(Long threadId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());

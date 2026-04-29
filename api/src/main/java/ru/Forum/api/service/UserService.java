@@ -27,7 +27,6 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-
     @Transactional
     public UserDTO register(AuthRequestDTO dto) {
         if (userRepository.existsByUsername(dto.getUsername())) {
