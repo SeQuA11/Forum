@@ -23,6 +23,13 @@ public class WebController {
     private final PostService postService;
     private final UserService userService;
 
+    public WebController(CategoryService categoryService, ThreadService threadService, PostService postService, UserService userService) {
+        this.categoryService = categoryService;
+        this.threadService = threadService;
+        this.postService = postService;
+        this.userService = userService;
+    }
+
 
     // Страница входа
     @GetMapping("/login")

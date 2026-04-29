@@ -26,6 +26,12 @@ public class PostService {
     private final ThreadRepository threadRepository;
     private final UserRepository userRepository;
 
+    public PostService(PostRepository postRepository, ThreadRepository threadRepository, UserRepository userRepository) {
+        this.postRepository = postRepository;
+        this.threadRepository = threadRepository;
+        this.userRepository = userRepository;
+    }
+
 
     @Transactional(readOnly = true)
     public Page<PostResponseDTO> getPostsByThread(Long threadId, int page, int size) {

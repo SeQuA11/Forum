@@ -23,6 +23,10 @@ public class ThreadController {
 
     private final ThreadService threadService;
 
+    public ThreadController(ThreadService threadService) {
+        this.threadService = threadService;
+    }
+
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить тему по ID")

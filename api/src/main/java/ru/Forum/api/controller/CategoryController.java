@@ -21,6 +21,10 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
+
     @GetMapping
     @Operation(summary = "Получить список активных категорий")
     @ApiResponse(responseCode = "200", description = "Список категорий")
