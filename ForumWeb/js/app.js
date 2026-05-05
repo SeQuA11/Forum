@@ -25,14 +25,14 @@ function initAuth() {
         welcomeMessage.textContent = `Добро пожаловать, ${AppState.currentUser.username}!`;
         roleBadge.textContent = AppState.currentUser.role;
         roleBadge.className = `badge ${AppState.currentUser.role}`;
-        
+
         // Показываем админ панель для модераторов и админов
         const isAdminOrMod = ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role);
         document.getElementById('adminPanel').style.display = isAdminOrMod ? 'block' : 'none';
-        
+
         // Показываем кнопку удаления темы для модераторов и админов
         document.getElementById('deleteThreadBtn').style.display = isAdminOrMod ? 'inline-block' : 'none';
-        
+
         // Показываем панель модерации
         document.getElementById('moderationPanel').style.display = isAdminOrMod ? 'block' : 'none';
     } else {
@@ -50,10 +50,10 @@ async function loadCategories() {
         const categories = await ForumAPI.getCategories();
         const categoryList = document.getElementById('categoryList');
         const threadCategory = document.getElementById('threadCategory');
-        
+
         categoryList.innerHTML = '<li data-id="all" class="active">Все категории</li>';
         threadCategory.innerHTML = '';
-        
+
         if (categories && categories.length > 0) {
             categories.forEach(cat => {
                 // Добавляем в список категорий
@@ -62,7 +62,7 @@ async function loadCategories() {
                 li.dataset.id = cat.id;
                 li.addEventListener('click', () => selectCategory(cat));
                 categoryList.appendChild(li);
-                
+
                 // Добавляем в select для создания темы
                 const option = document.createElement('option');
                 option.value = cat.id;
@@ -84,15 +84,15 @@ async function loadCategories() {
 // ========== Выбор категории ==========
 function selectCategory(category) {
     currentCategory = category;
-    
+
     // Обновляем активный элемент в списке
     document.querySelectorAll('#categoryList li').forEach(li => {
         li.classList.remove('active');
     });
     document.querySelector(`#categoryList li[data-id="${category.id}"]`).classList.add('active');
-    
+
     document.getElementById('currentCategoryTitle').textContent = `Категория: ${category.name}`;
-    
+
     loadThreadsByCategory(category.id);
 }
 
@@ -124,21 +124,21 @@ async function loadThreadsByCategory(categoryId) {
 function renderThreads(threads) {
     const tbody = document.getElementById('threadsTableBody');
     tbody.innerHTML = '';
-    
+
     if (!threads || threads.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="no-data">Темы не найдены</td></tr>';
         return;
     }
-    
+
     threads.forEach(thread => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${thread.id}</td>
-            <td>${escapeHtml(thread.title)}</td>
-            <td>${escapeHtml(thread.authorUsername || 'Неизвестно')}</td>
-            <td><span class="badge">${thread.status || 'ACTIVE'}</span></td>
-            <td>${thread.viewsCount || 0}</td>
-            <td>${formatDate(thread.createdAt)}</td>
+        <td>${thread.id}</td>
+        <td>${escapeHtml(thread.title)}</td>
+        <td>${escapeHtml(thread.authorUsername || 'Неизвестно')}</td>
+        <td><span class="badge">${thread.status || 'ACTIVE'}</span></td>
+        <td>${thread.viewsCount || 0}</td>
+        <td>${formatDate(thread.createdAt)}</td>
         `;
         tr.addEventListener('click', () => openThreadDetail(thread.id));
         tbody.appendChild(tr);
@@ -151,18 +151,18 @@ async function openThreadDetail(threadId) {
         // Просмотр темы (увеличиваем счетчик просмотров)
         const thread = await ForumAPI.viewThread(threadId);
         currentThread = thread;
-        
+
         // Загружаем посты
         const postsData = await ForumAPI.getPosts(threadId);
         const posts = postsData.content || postsData;
-        
+
         // Заполняем модальное окно
         document.getElementById('viewThreadTitle').textContent = thread.title;
         document.getElementById('viewThreadAuthor').textContent = `Автор: ${thread.authorUsername}`;
         document.getElementById('viewThreadStatus').textContent = thread.status;
         document.getElementById('viewThreadDate').textContent = formatDate(thread.createdAt);
         document.getElementById('viewThreadContent').innerHTML = `<p>${escapeHtml(thread.content)}</p>`;
-        
+
         // Отображаем посты
         const postsList = document.getElementById('postsList');
         postsList.innerHTML = '';
@@ -170,16 +170,16 @@ async function openThreadDetail(threadId) {
             const postDiv = document.createElement('div');
             postDiv.className = 'post';
             postDiv.innerHTML = `
-                <div class="post-author">${escapeHtml(post.authorUsername)}</div>
-                <div class="post-date">${formatDate(post.createdAt)}</div>
-                <div class="post-content">${escapeHtml(post.content)}</div>
+            <div class="post-author">${escapeHtml(post.authorUsername)}</div>
+            <div class="post-date">${formatDate(post.createdAt)}</div>
+            <div class="post-content">${escapeHtml(post.content)}</div>
             `;
             postsList.appendChild(postDiv);
         });
-        
+
         // Показываем секцию ответа если пользователь авторизован
         document.getElementById('replySection').style.display = AppState.currentUser ? 'block' : 'none';
-        
+
         // Открываем модальное окно
         document.getElementById('viewThreadModal').style.display = 'block';
     } catch (error) {
@@ -193,13 +193,13 @@ function setupEventListeners() {
     document.getElementById('loginBtn').addEventListener('click', () => {
         document.getElementById('loginModal').style.display = 'block';
     });
-    
+
     document.getElementById('registerBtn').addEventListener('click', () => {
         document.getElementById('registerModal').style.display = 'block';
     });
-    
+
     document.getElementById('logoutBtn').addEventListener('click', logout);
-    
+
     // Кнопки создания
     document.getElementById('createThreadBtn').addEventListener('click', () => {
         if (!AppState.currentUser) {
@@ -208,11 +208,11 @@ function setupEventListeners() {
         }
         document.getElementById('threadModal').style.display = 'block';
     });
-    
+
     document.getElementById('createCategoryBtn').addEventListener('click', () => {
         document.getElementById('categoryModal').style.display = 'block';
     });
-    
+
     // Кнопки управления темами
     document.getElementById('deleteThreadBtn').addEventListener('click', deleteSelectedThread);
     document.getElementById('refreshBtn').addEventListener('click', () => {
@@ -222,26 +222,26 @@ function setupEventListeners() {
             loadThreads();
         }
     });
-    
+
     // Модерация
     document.getElementById('pinThreadBtn').addEventListener('click', () => changeThreadStatus('PINNED'));
     document.getElementById('closeThreadBtn').addEventListener('click', () => changeThreadStatus('CLOSED'));
     document.getElementById('hideThreadBtn').addEventListener('click', () => changeThreadStatus('HIDDEN'));
-    
+
     // Формы
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
     document.getElementById('registerForm').addEventListener('submit', handleRegister);
     document.getElementById('threadForm').addEventListener('submit', handleCreateThread);
     document.getElementById('categoryForm').addEventListener('submit', handleCreateCategory);
     document.getElementById('replyForm').addEventListener('submit', handleCreateReply);
-    
+
     // Закрытие модальных окон
     document.querySelectorAll('.close').forEach(btn => {
         btn.addEventListener('click', function() {
             this.closest('.modal').style.display = 'none';
         });
     });
-    
+
     // Закрытие по клику вне окна
     window.addEventListener('click', (event) => {
         if (event.target.classList.contains('modal')) {
@@ -255,7 +255,7 @@ async function handleLogin(e) {
     e.preventDefault();
     const username = document.getElementById('loginUsername').value;
     const password = document.getElementById('loginPassword').value;
-    
+
     try {
         const response = await ForumAPI.login(username, password);
         AppState.saveAuth(response.token, {
@@ -263,7 +263,7 @@ async function handleLogin(e) {
             username: response.username,
             role: response.role
         });
-        
+
         document.getElementById('loginModal').style.display = 'none';
         document.getElementById('loginForm').reset();
         initAuth();
@@ -281,7 +281,7 @@ async function handleRegister(e) {
     e.preventDefault();
     const username = document.getElementById('registerUsername').value;
     const password = document.getElementById('registerPassword').value;
-    
+
     try {
         await ForumAPI.register(username, password);
         document.getElementById('registerModal').style.display = 'none';
@@ -303,13 +303,13 @@ async function handleCreateThread(e) {
     const title = document.getElementById('threadTitle').value;
     const content = document.getElementById('threadContent').value;
     const categoryId = document.getElementById('threadCategory').value;
-    
+
     try {
         await ForumAPI.createThread(title, content, parseInt(categoryId));
         document.getElementById('threadModal').style.display = 'none';
         document.getElementById('threadForm').reset();
         showSuccess('Тема создана!');
-        
+
         if (currentCategory) {
             loadThreadsByCategory(currentCategory.id);
         } else {
@@ -325,7 +325,7 @@ async function handleCreateCategory(e) {
     const name = document.getElementById('categoryName').value;
     const description = document.getElementById('categoryDescription').value;
     const slug = document.getElementById('categorySlug').value;
-    
+
     try {
         await ForumAPI.createCategory(name, description, slug);
         document.getElementById('categoryModal').style.display = 'none';
@@ -340,25 +340,25 @@ async function handleCreateCategory(e) {
 async function handleCreateReply(e) {
     e.preventDefault();
     const content = document.getElementById('replyContent').value;
-    
+
     try {
         await ForumAPI.createPost(currentThread.id, content);
         document.getElementById('replyForm').reset();
         showSuccess('Ответ добавлен!');
-        
+
         // Перезагружаем посты
         const postsData = await ForumAPI.getPosts(currentThread.id);
         const posts = postsData.content || postsData;
-        
+
         const postsList = document.getElementById('postsList');
         postsList.innerHTML = '';
         posts.forEach(post => {
             const postDiv = document.createElement('div');
             postDiv.className = 'post';
             postDiv.innerHTML = `
-                <div class="post-author">${escapeHtml(post.authorUsername)}</div>
-                <div class="post-date">${formatDate(post.createdAt)}</div>
-                <div class="post-content">${escapeHtml(post.content)}</div>
+            <div class="post-author">${escapeHtml(post.authorUsername)}</div>
+            <div class="post-date">${formatDate(post.createdAt)}</div>
+            <div class="post-content">${escapeHtml(post.content)}</div>
             `;
             postsList.appendChild(postDiv);
         });
@@ -375,16 +375,16 @@ async function deleteSelectedThread() {
         showError('Выберите тему для удаления (откройте тему)');
         return;
     }
-    
+
     if (!confirm(`Вы уверены, что хотите удалить тему "${currentThread.title}"?`)) {
         return;
     }
-    
+
     try {
         await ForumAPI.deleteThread(currentThread.id);
         document.getElementById('viewThreadModal').style.display = 'none';
         showSuccess('Тема удалена!');
-        
+
         if (currentCategory) {
             loadThreadsByCategory(currentCategory.id);
         } else {
@@ -401,15 +401,15 @@ async function changeThreadStatus(status) {
         showError('Выберите тему для модерации');
         return;
     }
-    
+
     try {
         await ForumAPI.updateThreadStatus(currentThread.id, status);
         showSuccess(`Статус темы изменен на ${status}`);
-        
+
         // Обновляем отображение
         document.getElementById('viewThreadStatus').textContent = status;
         currentThread.status = status;
-        
+
         if (currentCategory) {
             loadThreadsByCategory(currentCategory.id);
         } else {
@@ -435,11 +435,11 @@ function showError(message) {
     notification.className = 'notification error';
     notification.textContent = message;
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.classList.add('show');
     }, 10);
-    
+
     setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 300);
@@ -453,11 +453,11 @@ function showSuccess(message) {
     notification.className = 'notification success';
     notification.textContent = message;
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.classList.add('show');
     }, 10);
-    
+
     setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 300);
