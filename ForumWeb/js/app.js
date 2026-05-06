@@ -173,13 +173,25 @@ function renderThreads(threads) {
         return;
     }
 
+    // Сортируем темы: закрепленные (PINNED) сверху
+    const sortedThreads = [...threads].sort((a, b) => {
+        const aPinned = a.status === 'PINNED';
+        const bPinned = b.status === 'PINNED';
+        if (aPinned && !bPinned) return -1;
+        if (!aPinned && bPinned) return 1;
+        return 0;
+    });
+
     const isAdminOrMod = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role);
 
-    threads.forEach(thread => {
+    sortedThreads.forEach(thread => {
         const tr = document.createElement('tr');
+        const isPinned = thread.status === 'PINNED';
+        const pinIcon = isPinned ? '<span class="pin-icon" title="Закрепленная тема">📌 </span>' : '';
+        
         tr.innerHTML = `
         <td>${thread.id}</td>
-        <td>${escapeHtml(thread.title)}</td>
+        <td>${pinIcon}${escapeHtml(thread.title)}</td>
         <td>${escapeHtml(thread.authorUsername || 'Неизвестно')}</td>
         <td><span class="badge">${thread.status || 'ACTIVE'}</span></td>
         <td>${thread.viewsCount || 0}</td>

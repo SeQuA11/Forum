@@ -484,3 +484,9 @@ body {
     background-color: #28a745;
     color: white;
 }
+
+/* Иконка закрепленной темы */
+.pin-icon {
+    font-size: 1.2em;
+    margin-right: 5px;
+}
