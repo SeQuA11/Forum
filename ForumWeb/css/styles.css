@@ -264,7 +264,7 @@ body {
     max-height: 85vh;
     display: flex;
     flex-direction: column;
-    margin: 3% auto;
+    margin: 2% auto;
     overflow: hidden;
 }
 
@@ -273,7 +273,7 @@ body {
     flex-direction: column;
     height: 100%;
     overflow: hidden;
-    padding: 10px;
+    padding: 15px;
 }
 
 .thread-title-header {
@@ -281,13 +281,14 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 15px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     flex-shrink: 0;
 }
 
 .thread-title-header h2 {
     margin: 0;
     flex: 1;
+    font-size: 1.5em;
 }
 
 .modal-large .thread-meta,
@@ -295,15 +296,22 @@ body {
     flex-shrink: 0;
 }
 
+.modal-large .thread-moderation-panel {
+    margin: 10px 0;
+    padding: 10px;
+}
+
 .modal-large .thread-content {
     flex-shrink: 0;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
+    padding: 15px;
 }
 
 .modal-large h3 {
     flex-shrink: 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 1.1em;
 }
 
 .posts-container {
