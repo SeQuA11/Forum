@@ -42,9 +42,10 @@
             <section class="content-area">
                 <div class="toolbar">
                     <h2 id="currentCategoryTitle">Все темы</h2>
-                    <button id="createThreadBtn" class="btn btn-success">Создать тему</button>
-                    <button id="deleteThreadBtn" class="btn btn-danger" style="display: none;">Удалить тему</button>
-                    <button id="refreshBtn" class="btn btn-secondary">Обновить</button>
+                    <div class="toolbar-buttons">
+                        <button id="createThreadBtn" class="btn btn-success">Создать тему</button>
+                        <button id="refreshBtn" class="btn btn-secondary">Обновить</button>
+                    </div>
                 </div>
 
                 <!-- Таблица тем -->
@@ -57,20 +58,13 @@
                             <th>Статус</th>
                             <th>Просмотры</th>
                             <th>Дата</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="threadsTableBody">
                         <!-- Темы загружаются динамически -->
                     </tbody>
                 </table>
-
-                <!-- Модерация тем -->
-                <div id="moderationPanel" class="moderation-panel" style="display: none;">
-                    <h3>Модерация</h3>
-                    <button id="pinThreadBtn" class="btn btn-warning">Закрепить</button>
-                    <button id="closeThreadBtn" class="btn btn-warning">Закрыть</button>
-                    <button id="hideThreadBtn" class="btn btn-warning">Скрыть</button>
-                </div>
             </section>
         </main>
 
@@ -126,27 +120,43 @@
         <div id="viewThreadModal" class="modal" style="display: none;">
             <div class="modal-content modal-large">
                 <span class="close">&times;</span>
-                <h2 id="viewThreadTitle"></h2>
-                <div class="thread-meta">
-                    <span id="viewThreadAuthor"></span> | 
-                    <span id="viewThreadStatus" class="badge"></span> | 
-                    <span id="viewThreadDate"></span>
-                </div>
-                <div id="viewThreadContent" class="thread-content"></div>
-                
-                <h3>Ответы</h3>
-                <div id="postsList" class="posts-list">
-                    <!-- Посты загружаются динамически -->
-                </div>
-                
-                <div id="replySection" style="display: none;">
-                    <h4>Добавить ответ</h4>
-                    <form id="replyForm">
-                        <div class="form-group">
-                            <textarea id="replyContent" rows="4" required></textarea>
+                <div class="modal-content-wrapper">
+                    <div class="thread-title-header">
+                        <h2 id="viewThreadTitle"></h2>
+                        <button id="deleteThreadModalBtn" class="btn btn-danger" style="display: none;">Удалить</button>
+                    </div>
+                    <div class="thread-meta">
+                        <span id="viewThreadAuthor"></span> | 
+                        <span id="viewThreadStatus" class="badge"></span> | 
+                        <span id="viewThreadDate"></span>
+                    </div>
+                    
+                    <!-- Панель модерации внутри темы -->
+                    <div id="threadModerationPanel" class="thread-moderation-panel" style="display: none;">
+                        <button id="activeThreadBtn" class="btn btn-success">Активна</button>
+                        <button id="pinThreadBtn" class="btn btn-warning">Закрепить</button>
+                        <button id="closeThreadBtn" class="btn btn-secondary">Закрыть</button>
+                        <button id="hideThreadBtn" class="btn btn-danger">Скрыть</button>
+                    </div>
+                    
+                    <div id="viewThreadContent" class="thread-content"></div>
+                    
+                    <h3>Ответы</h3>
+                    <div id="postsContainer" class="posts-container">
+                        <div id="postsList" class="posts-list">
+                            <!-- Посты загружаются динамически -->
                         </div>
-                        <button type="submit" class="btn btn-success">Отправить</button>
-                    </form>
+                    </div>
+                    
+                    <div id="replySection" class="reply-section" style="display: none;">
+                        <h4>Добавить ответ</h4>
+                        <form id="replyForm">
+                            <div class="form-group">
+                                <textarea id="replyContent" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success">Отправить</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -186,6 +196,21 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
                 </form>
+            </div>
+        </div>
+
+        <!-- Модальное окно выбора статуса темы (контекстное меню) -->
+        <div id="statusModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Изменить статус темы</h2>
+                <p id="statusModalThreadTitle" style="margin-bottom: 15px; color: #666;"></p>
+                <div class="status-options">
+                    <button data-status="ACTIVE" class="btn btn-success btn-block">ACTIVE (Активна)</button>
+                    <button data-status="PINNED" class="btn btn-warning btn-block">PINNED (Закреплена)</button>
+                    <button data-status="CLOSED" class="btn btn-secondary btn-block">CLOSED (Закрыта)</button>
+                    <button data-status="HIDDEN" class="btn btn-danger btn-block">HIDDEN (Скрыта)</button>
+                </div>
             </div>
         </div>
     </div>

@@ -113,6 +113,17 @@ body {
     margin-bottom: 10px;
 }
 
+/* Маленькая кнопка */
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.85em;
+}
+
+/* Кнопка удаления в таблице */
+.delete-thread-btn {
+    white-space: nowrap;
+}
+
 /* Основной контент */
 .main-content {
     display: grid;
@@ -183,6 +194,7 @@ body {
 .toolbar-buttons {
     display: flex;
     gap: 10px;
+    margin-left: auto;
 }
 
 /* Таблица тем */
@@ -209,21 +221,20 @@ body {
     cursor: pointer;
 }
 
-/* Панель модерации */
-.moderation-panel {
-    margin-top: 20px;
+/* Панель модерации внутри темы */
+.thread-moderation-panel {
+    margin: 15px 0;
     padding: 15px;
     background-color: #fff3cd;
     border-radius: 5px;
     border-left: 4px solid #ffc107;
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
-.moderation-panel h3 {
-    margin-bottom: 10px;
-}
-
-.moderation-panel button {
-    margin-right: 10px;
+.thread-moderation-panel button {
+    margin-right: 0;
 }
 
 /* Модальные окна */
@@ -250,6 +261,72 @@ body {
 
 .modal-large {
     max-width: 800px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    margin: 2% auto;
+    overflow: hidden;
+}
+
+.modal-large .modal-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    padding: 15px;
+}
+
+.thread-title-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 5px;
+    flex-shrink: 0;
+}
+
+.thread-title-header h2 {
+    margin: 0;
+    flex: 1;
+    font-size: 1.5em;
+}
+
+.modal-large .thread-meta,
+.modal-large .thread-moderation-panel {
+    flex-shrink: 0;
+}
+
+.modal-large .thread-moderation-panel {
+    margin: 10px 0;
+    padding: 10px;
+}
+
+.modal-large .thread-content {
+    flex-shrink: 0;
+    margin-bottom: 10px;
+    padding: 15px;
+}
+
+.modal-large h3 {
+    flex-shrink: 0;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+}
+
+.posts-container {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 150px;
+    max-height: 350px;
+    margin: 10px 0;
+}
+
+.reply-section {
+    flex-shrink: 0;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
 }
 
 .close {
@@ -423,4 +500,10 @@ body {
 .badge ACTIVE {
     background-color: #28a745;
     color: white;
+}
+
+/* Иконка закрепленной темы */
+.pin-icon {
+    font-size: 1.2em;
+    margin-right: 5px;
 }

@@ -5,12 +5,16 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCategories();
     loadThreads();
     setupEventListeners();
+    
+    // Показываем панель модерации в модальном окне для авторизованных пользователей
+    updateThreadModerationPanel();
 });
 
 // Глобальные переменные
 let currentCategory = null;
 let currentThread = null;
 let selectedThreadId = null;
+let statusModalThread = null; // Тема для модального окна статуса
 
 // ========== Инициализация аутентификации ==========
 function initAuth() {
@@ -30,18 +34,27 @@ function initAuth() {
         const isAdminOrMod = ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role);
         document.getElementById('adminPanel').style.display = isAdminOrMod ? 'block' : 'none';
 
-        // Показываем кнопку удаления темы для модераторов и админов
-        document.getElementById('deleteThreadBtn').style.display = isAdminOrMod ? 'inline-block' : 'none';
-
-        // Показываем панель модерации
-        document.getElementById('moderationPanel').style.display = isAdminOrMod ? 'block' : 'none';
+        // Перезагружаем темы для отображения кнопок удаления
+        if (currentCategory) {
+            loadThreadsByCategory(currentCategory.id);
+        } else {
+            loadThreads();
+        }
     } else {
         userInfo.style.display = 'none';
         authButtons.style.display = 'flex';
         document.getElementById('adminPanel').style.display = 'none';
-        document.getElementById('deleteThreadBtn').style.display = 'none';
-        document.getElementById('moderationPanel').style.display = 'none';
+        
+        // Перезагружаем темы для скрытия кнопок удаления
+        if (currentCategory) {
+            loadThreadsByCategory(currentCategory.id);
+        } else {
+            loadThreads();
+        }
     }
+    
+    // Обновляем панель модерации в модальном окне
+    updateThreadModerationPanel();
 }
 
 // ========== Загрузка категорий ==========
@@ -51,7 +64,17 @@ async function loadCategories() {
         const categoryList = document.getElementById('categoryList');
         const threadCategory = document.getElementById('threadCategory');
 
-        categoryList.innerHTML = '<li data-id="all" class="active">Все категории</li>';
+        // Очищаем список перед заполнением, чтобы избежать дублирования
+        categoryList.innerHTML = '';
+        
+        // Создаем элемент "Все категории" с обработчиком
+        const allLi = document.createElement('li');
+        allLi.textContent = 'Все категории';
+        allLi.dataset.id = 'all';
+        allLi.classList.add('active');
+        allLi.addEventListener('click', selectAllCategories);
+        categoryList.appendChild(allLi);
+        
         threadCategory.innerHTML = '';
 
         if (categories && categories.length > 0) {
@@ -89,11 +112,32 @@ function selectCategory(category) {
     document.querySelectorAll('#categoryList li').forEach(li => {
         li.classList.remove('active');
     });
-    document.querySelector(`#categoryList li[data-id="${category.id}"]`).classList.add('active');
+    const activeLi = document.querySelector(`#categoryList li[data-id="${category.id}"]`);
+    if (activeLi) {
+        activeLi.classList.add('active');
+    } else {
+        // Если категория не найдена по id, активируем "Все категории"
+        document.querySelector('#categoryList li[data-id="all"]').classList.add('active');
+    }
 
     document.getElementById('currentCategoryTitle').textContent = `Категория: ${category.name}`;
 
     loadThreadsByCategory(category.id);
+}
+
+// ========== Выбор всех категорий ==========
+function selectAllCategories() {
+    currentCategory = null;
+
+    // Обновляем активный элемент в списке
+    document.querySelectorAll('#categoryList li').forEach(li => {
+        li.classList.remove('active');
+    });
+    document.querySelector('#categoryList li[data-id="all"]').classList.add('active');
+
+    document.getElementById('currentCategoryTitle').textContent = 'Все темы';
+
+    loadThreads();
 }
 
 // ========== Загрузка тем ==========
@@ -105,7 +149,7 @@ async function loadThreads() {
         console.error('Ошибка загрузки тем:', error);
         showError('Ошибка загрузки тем: проверьте подключение к API');
         const tbody = document.getElementById('threadsTableBody');
-        tbody.innerHTML = '<tr><td colspan="6" class="no-data">Ошибка загрузки тем</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Ошибка загрузки тем</td></tr>';
     }
 }
 
@@ -117,7 +161,7 @@ async function loadThreadsByCategory(categoryId) {
         console.error('Ошибка загрузки тем категории:', error);
         showError('Ошибка загрузки тем: проверьте подключение к API');
         const tbody = document.getElementById('threadsTableBody');
-        tbody.innerHTML = '<tr><td colspan="6" class="no-data">Ошибка загрузки тем</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Ошибка загрузки тем</td></tr>';
     }
 }
 
@@ -126,21 +170,48 @@ function renderThreads(threads) {
     tbody.innerHTML = '';
 
     if (!threads || threads.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="no-data">Темы не найдены</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Темы не найдены</td></tr>';
         return;
     }
 
-    threads.forEach(thread => {
+    // Сортируем темы: закрепленные (PINNED) сверху
+    const sortedThreads = [...threads].sort((a, b) => {
+        const aPinned = a.status === 'PINNED';
+        const bPinned = b.status === 'PINNED';
+        if (aPinned && !bPinned) return -1;
+        if (!aPinned && bPinned) return 1;
+        return 0;
+    });
+
+    const isAdminOrMod = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role);
+
+    sortedThreads.forEach(thread => {
         const tr = document.createElement('tr');
+        const isPinned = thread.status === 'PINNED';
+        const pinIcon = isPinned ? '<span class="pin-icon" title="Закрепленная тема">📌 </span>' : '';
+        
         tr.innerHTML = `
         <td>${thread.id}</td>
-        <td>${escapeHtml(thread.title)}</td>
+        <td>${pinIcon}${escapeHtml(thread.title)}</td>
         <td>${escapeHtml(thread.authorUsername || 'Неизвестно')}</td>
         <td><span class="badge">${thread.status || 'ACTIVE'}</span></td>
         <td>${thread.viewsCount || 0}</td>
         <td>${formatDate(thread.createdAt)}</td>
+        <td>${isAdminOrMod ? `<button class="btn btn-danger btn-sm delete-thread-btn" data-thread-id="${thread.id}">Удалить</button>` : ''}</td>
         `;
-        tr.addEventListener('click', () => openThreadDetail(thread.id));
+        // Левый клик - открытие темы (если не кнопка удаления)
+        tr.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('delete-thread-btn')) {
+                openThreadDetail(thread.id);
+            }
+        });
+        // Правый клик - модальное окно выбора статуса (только для ADMIN/MODERATOR)
+        tr.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (isAdminOrMod) {
+                openStatusModal(thread);
+            }
+        });
         tbody.appendChild(tr);
     });
 }
@@ -180,6 +251,9 @@ async function openThreadDetail(threadId) {
         // Показываем секцию ответа если пользователь авторизован
         document.getElementById('replySection').style.display = AppState.currentUser ? 'block' : 'none';
 
+        // Обновляем панель модерации в модальном окне
+        updateThreadModerationPanel();
+
         // Открываем модальное окно
         document.getElementById('viewThreadModal').style.display = 'block';
     } catch (error) {
@@ -214,7 +288,16 @@ function setupEventListeners() {
     });
 
     // Кнопки управления темами
-    document.getElementById('deleteThreadBtn').addEventListener('click', deleteSelectedThread);
+    document.getElementById('deleteThreadModalBtn').addEventListener('click', deleteSelectedThread);
+    
+    // Обработчик для кнопок удаления в таблице тем (делегирование событий)
+    document.getElementById('threadsTableBody').addEventListener('click', (e) => {
+        if (e.target.classList.contains('delete-thread-btn')) {
+            const threadId = parseInt(e.target.dataset.threadId);
+            deleteThreadById(threadId);
+        }
+    });
+    
     document.getElementById('refreshBtn').addEventListener('click', () => {
         if (currentCategory) {
             loadThreadsByCategory(currentCategory.id);
@@ -224,9 +307,21 @@ function setupEventListeners() {
     });
 
     // Модерация
+    document.getElementById('activeThreadBtn').addEventListener('click', () => changeThreadStatus('ACTIVE'));
     document.getElementById('pinThreadBtn').addEventListener('click', () => changeThreadStatus('PINNED'));
     document.getElementById('closeThreadBtn').addEventListener('click', () => changeThreadStatus('CLOSED'));
     document.getElementById('hideThreadBtn').addEventListener('click', () => changeThreadStatus('HIDDEN'));
+
+    // Обработчик для кнопок выбора статуса в модальном окне
+    document.querySelectorAll('#statusModal button[data-status]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const status = this.dataset.status;
+            if (statusModalThread) {
+                changeThreadStatusById(statusModalThread.id, status);
+                document.getElementById('statusModal').style.display = 'none';
+            }
+        });
+    });
 
     // Формы
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
@@ -395,6 +490,26 @@ async function deleteSelectedThread() {
     }
 }
 
+// ========== Удаление темы по ID (из таблицы) ==========
+async function deleteThreadById(threadId) {
+    if (!confirm('Вы уверены, что хотите удалить эту тему?')) {
+        return;
+    }
+
+    try {
+        await ForumAPI.deleteThread(threadId);
+        showSuccess('Тема удалена!');
+
+        if (currentCategory) {
+            loadThreadsByCategory(currentCategory.id);
+        } else {
+            loadThreads();
+        }
+    } catch (error) {
+        showError('Ошибка удаления темы: ' + error.message);
+    }
+}
+
 // ========== Изменение статуса темы ==========
 async function changeThreadStatus(status) {
     if (!currentThread) {
@@ -417,6 +532,44 @@ async function changeThreadStatus(status) {
         }
     } catch (error) {
         showError('Ошибка изменения статуса: ' + error.message);
+    }
+}
+
+// ========== Изменение статуса темы по ID (из модального окна статуса) ==========
+async function changeThreadStatusById(threadId, status) {
+    try {
+        await ForumAPI.updateThreadStatus(threadId, status);
+        showSuccess(`Статус темы изменен на ${status}`);
+
+        if (currentCategory) {
+            loadThreadsByCategory(currentCategory.id);
+        } else {
+            loadThreads();
+        }
+    } catch (error) {
+        showError('Ошибка изменения статуса: ' + error.message);
+    }
+}
+
+// ========== Открытие модального окна выбора статуса ==========
+function openStatusModal(thread) {
+    statusModalThread = thread;
+    document.getElementById('statusModalThreadTitle').textContent = `Тема: ${thread.title}`;
+    document.getElementById('statusModal').style.display = 'block';
+}
+
+// ========== Обновление панели модерации в модальном окне ==========
+function updateThreadModerationPanel() {
+    const moderationPanel = document.getElementById('threadModerationPanel');
+    if (!moderationPanel) return;
+    
+    const isAdminOrMod = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role);
+    moderationPanel.style.display = isAdminOrMod ? 'flex' : 'none';
+    
+    // Обновляем кнопку удаления в модальном окне
+    const deleteBtnModal = document.getElementById('deleteThreadModalBtn');
+    if (deleteBtnModal) {
+        deleteBtnModal.style.display = isAdminOrMod ? 'inline-block' : 'none';
     }
 }
 
