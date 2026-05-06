@@ -265,6 +265,20 @@ body {
     padding: 10px;
 }
 
+.thread-title-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.thread-title-header h2 {
+    margin: 0;
+    flex: 1;
+}
+
 .modal-large .thread-meta,
 .modal-large .thread-content,
 .modal-large h3,
