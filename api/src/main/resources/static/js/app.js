@@ -17,6 +17,7 @@ let selectedThreadId = null;
 let statusModalThread = null; // Тема для модального окна статуса
 
 // ========== Инициализация аутентификации ==========
+// ========== Инициализация аутентификации ==========
 function initAuth() {
     const userInfo = document.getElementById('userInfo');
     const authButtons = document.getElementById('authButtons');
@@ -34,6 +35,12 @@ function initAuth() {
         const isAdminOrMod = ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role);
         document.getElementById('adminPanel').style.display = isAdminOrMod ? 'block' : 'none';
 
+        // Показываем столбец "Статус" только для администраторов и модераторов
+        const adminOnlyElements = document.querySelectorAll('.admin-only');
+        adminOnlyElements.forEach(el => {
+            el.style.display = isAdminOrMod ? 'table-cell' : 'none';
+        });
+
         // Перезагружаем темы для отображения кнопок удаления
         if (currentCategory) {
             loadThreadsByCategory(currentCategory.id);
@@ -44,6 +51,12 @@ function initAuth() {
         userInfo.style.display = 'none';
         authButtons.style.display = 'flex';
         document.getElementById('adminPanel').style.display = 'none';
+        
+        // Скрываем столбец "Статус" для неавторизованных пользователей
+        const adminOnlyElements = document.querySelectorAll('.admin-only');
+        adminOnlyElements.forEach(el => {
+            el.style.display = 'none';
+        });
         
         // Перезагружаем темы для скрытия кнопок удаления
         if (currentCategory) {
@@ -169,7 +182,8 @@ function renderThreads(threads) {
     tbody.innerHTML = '';
 
     if (!threads || threads.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Темы не найдены</td></tr>';
+        const colspan = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role) ? 7 : 6;
+        tbody.innerHTML = `<tr><td colspan="${colspan}" class="no-data">Темы не найдены</td></tr>`;
         return;
     }
 
@@ -189,10 +203,13 @@ function renderThreads(threads) {
         const isPinned = thread.status === 'PINNED';
         const pinIcon = isPinned ? '<span class="pin-icon" title="Закрепленная тема">📌 </span>' : '';
         
+        // Ячейка со статусом только для администраторов и модераторов
+        const statusCell = isAdminOrMod ? `<td><span class="badge">${thread.status || 'ACTIVE'}</span></td>` : '';
+        
         tr.innerHTML = `
         <td>${pinIcon}${escapeHtml(thread.title)}</td>
         <td>${escapeHtml(thread.authorUsername || 'Неизвестно')}</td>
-        <td><span class="badge">${thread.status || 'ACTIVE'}</span></td>
+        ${statusCell}
         <td>${thread.viewsCount || 0}</td>
         <td>${formatDate(thread.createdAt)}</td>
         <td>${isAdminOrMod ? `<button class="btn btn-danger btn-sm delete-thread-btn" data-thread-id="${thread.id}">Удалить</button>` : ''}</td>
@@ -213,52 +230,6 @@ function renderThreads(threads) {
         tbody.appendChild(tr);
     });
 }
-
-// ========== Открытие детали темы ==========
-async function openThreadDetail(threadId) {
-    try {
-        // Просмотр темы (увеличиваем счетчик просмотров)
-        const thread = await ForumAPI.viewThread(threadId);
-        currentThread = thread;
-
-        // Загружаем посты
-        const postsData = await ForumAPI.getPosts(threadId);
-        const posts = postsData.content || postsData;
-
-        // Заполняем модальное окно
-        document.getElementById('viewThreadTitle').textContent = thread.title;
-        document.getElementById('viewThreadAuthor').textContent = `Автор: ${thread.authorUsername}`;
-        document.getElementById('viewThreadStatus').textContent = thread.status;
-        document.getElementById('viewThreadDate').textContent = formatDate(thread.createdAt);
-        document.getElementById('viewThreadContent').innerHTML = `<p>${escapeHtml(thread.content)}</p>`;
-
-        // Отображаем посты
-        const postsList = document.getElementById('postsList');
-        postsList.innerHTML = '';
-        posts.forEach(post => {
-            const postDiv = document.createElement('div');
-            postDiv.className = 'post';
-            postDiv.innerHTML = `
-            <div class="post-author">${escapeHtml(post.authorUsername)}</div>
-            <div class="post-date">${formatDate(post.createdAt)}</div>
-            <div class="post-content">${escapeHtml(post.content)}</div>
-            `;
-            postsList.appendChild(postDiv);
-        });
-
-        // Показываем секцию ответа если пользователь авторизован
-        document.getElementById('replySection').style.display = AppState.currentUser ? 'block' : 'none';
-
-        // Обновляем панель модерации в модальном окне
-        updateThreadModerationPanel();
-
-        // Открываем модальное окно
-        document.getElementById('viewThreadModal').style.display = 'block';
-    } catch (error) {
-        showError('Ошибка открытия темы: ' + error.message);
-    }
-}
-
 // ========== Настройка обработчиков событий ==========
 function setupEventListeners() {
     // Кнопки аутентификации

@@ -507,3 +507,8 @@ body {
     font-size: 1.2em;
     margin-right: 5px;
 }
+
+/* Скрытие элементов для обычных пользователей */
+.admin-only {
+    display: none;
+}
