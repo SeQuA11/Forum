@@ -47,7 +47,7 @@ public class SecurityConfig {
                 // Настраиваем авторизацию запросов
                 .authorizeHttpRequests(auth -> auth
                         // Публичные эндпоинты (без аутентификации)
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/webjars/**").permitAll()
@@ -55,8 +55,8 @@ public class SecurityConfig {
                         .requestMatchers("/", "/index.html", "/css/**", "/js/**", "/images/**").permitAll()
 
                         // GET запросы к категориям и темам - публичные
-                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/threads/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/**", "/api/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/threads/**", "/api/threads/**").permitAll()
 
                         // Все остальные запросы требуют аутентификации
                         .anyRequest().authenticated()
