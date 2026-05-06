@@ -1,4 +1,13 @@
 ```
+<<<<<<< ui-adjustment-suggestions-9b311
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*
+=======
 # Compiled and build artifacts
 *.class
 *.o
@@ -16,10 +25,26 @@ vendor/
 *.log
 *.tmp
 *.swp
+>>>>>>> front
 
-# Editors
+# Build artifacts
+target/
+
+# IDE
 .vscode/
 .idea/
+<<<<<<< ui-adjustment-suggestions-9b311
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# Package lock files
+package-lock.json
+=======
 *.iml
 
 # Environment
@@ -80,4 +105,5 @@ build/
 !cache/README
 .classpath
 .project
+>>>>>>> front
 ```
