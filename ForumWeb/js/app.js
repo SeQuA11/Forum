@@ -33,13 +33,23 @@ function initAuth() {
         const isAdminOrMod = ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role);
         document.getElementById('adminPanel').style.display = isAdminOrMod ? 'block' : 'none';
 
-        // Показываем кнопку удаления темы для модераторов и админов
-        document.getElementById('deleteThreadBtn').style.display = isAdminOrMod ? 'inline-block' : 'none';
+        // Перезагружаем темы для отображения кнопок удаления
+        if (currentCategory) {
+            loadThreadsByCategory(currentCategory.id);
+        } else {
+            loadThreads();
+        }
     } else {
         userInfo.style.display = 'none';
         authButtons.style.display = 'flex';
         document.getElementById('adminPanel').style.display = 'none';
-        document.getElementById('deleteThreadBtn').style.display = 'none';
+        
+        // Перезагружаем темы для скрытия кнопок удаления
+        if (currentCategory) {
+            loadThreadsByCategory(currentCategory.id);
+        } else {
+            loadThreads();
+        }
     }
     
     // Обновляем панель модерации в модальном окне
@@ -138,7 +148,7 @@ async function loadThreads() {
         console.error('Ошибка загрузки тем:', error);
         showError('Ошибка загрузки тем: проверьте подключение к API');
         const tbody = document.getElementById('threadsTableBody');
-        tbody.innerHTML = '<tr><td colspan="6" class="no-data">Ошибка загрузки тем</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Ошибка загрузки тем</td></tr>';
     }
 }
 
@@ -150,7 +160,7 @@ async function loadThreadsByCategory(categoryId) {
         console.error('Ошибка загрузки тем категории:', error);
         showError('Ошибка загрузки тем: проверьте подключение к API');
         const tbody = document.getElementById('threadsTableBody');
-        tbody.innerHTML = '<tr><td colspan="6" class="no-data">Ошибка загрузки тем</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Ошибка загрузки тем</td></tr>';
     }
 }
 
@@ -159,9 +169,11 @@ function renderThreads(threads) {
     tbody.innerHTML = '';
 
     if (!threads || threads.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="no-data">Темы не найдены</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Темы не найдены</td></tr>';
         return;
     }
+
+    const isAdminOrMod = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role);
 
     threads.forEach(thread => {
         const tr = document.createElement('tr');
@@ -172,8 +184,13 @@ function renderThreads(threads) {
         <td><span class="badge">${thread.status || 'ACTIVE'}</span></td>
         <td>${thread.viewsCount || 0}</td>
         <td>${formatDate(thread.createdAt)}</td>
+        <td>${isAdminOrMod ? `<button class="btn btn-danger btn-sm delete-thread-btn" data-thread-id="${thread.id}">Удалить</button>` : ''}</td>
         `;
-        tr.addEventListener('click', () => openThreadDetail(thread.id));
+        tr.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('delete-thread-btn')) {
+                openThreadDetail(thread.id);
+            }
+        });
         tbody.appendChild(tr);
     });
 }
@@ -250,8 +267,16 @@ function setupEventListeners() {
     });
 
     // Кнопки управления темами
-    document.getElementById('deleteThreadBtn').addEventListener('click', deleteSelectedThread);
     document.getElementById('deleteThreadModalBtn').addEventListener('click', deleteSelectedThread);
+    
+    // Обработчик для кнопок удаления в таблице тем (делегирование событий)
+    document.getElementById('threadsTableBody').addEventListener('click', (e) => {
+        if (e.target.classList.contains('delete-thread-btn')) {
+            const threadId = parseInt(e.target.dataset.threadId);
+            deleteThreadById(threadId);
+        }
+    });
+    
     document.getElementById('refreshBtn').addEventListener('click', () => {
         if (currentCategory) {
             loadThreadsByCategory(currentCategory.id);
@@ -420,6 +445,26 @@ async function deleteSelectedThread() {
     try {
         await ForumAPI.deleteThread(currentThread.id);
         document.getElementById('viewThreadModal').style.display = 'none';
+        showSuccess('Тема удалена!');
+
+        if (currentCategory) {
+            loadThreadsByCategory(currentCategory.id);
+        } else {
+            loadThreads();
+        }
+    } catch (error) {
+        showError('Ошибка удаления темы: ' + error.message);
+    }
+}
+
+// ========== Удаление темы по ID (из таблицы) ==========
+async function deleteThreadById(threadId) {
+    if (!confirm('Вы уверены, что хотите удалить эту тему?')) {
+        return;
+    }
+
+    try {
+        await ForumAPI.deleteThread(threadId);
         showSuccess('Тема удалена!');
 
         if (currentCategory) {
