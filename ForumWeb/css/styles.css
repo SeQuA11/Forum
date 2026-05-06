@@ -113,6 +113,17 @@ body {
     margin-bottom: 10px;
 }
 
+/* Маленькая кнопка */
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.85em;
+}
+
+/* Кнопка удаления в таблице */
+.delete-thread-btn {
+    white-space: nowrap;
+}
+
 /* Основной контент */
 .main-content {
     display: grid;
