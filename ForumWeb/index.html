@@ -197,6 +197,21 @@
                 </form>
             </div>
         </div>
+
+        <!-- Модальное окно выбора статуса темы (контекстное меню) -->
+        <div id="statusModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Изменить статус темы</h2>
+                <p id="statusModalThreadTitle" style="margin-bottom: 15px; color: #666;"></p>
+                <div class="status-options">
+                    <button data-status="ACTIVE" class="btn btn-success btn-block">ACTIVE (Активна)</button>
+                    <button data-status="PINNED" class="btn btn-warning btn-block">PINNED (Закреплена)</button>
+                    <button data-status="CLOSED" class="btn btn-secondary btn-block">CLOSED (Закрыта)</button>
+                    <button data-status="HIDDEN" class="btn btn-danger btn-block">HIDDEN (Скрыта)</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="js/api.js"></script>

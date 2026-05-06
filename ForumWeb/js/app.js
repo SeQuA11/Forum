@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 let currentCategory = null;
 let currentThread = null;
 let selectedThreadId = null;
+let statusModalThread = null; // Тема для модального окна статуса
 
 // ========== Инициализация аутентификации ==========
 function initAuth() {
@@ -198,9 +199,17 @@ function renderThreads(threads) {
         <td>${formatDate(thread.createdAt)}</td>
         <td>${isAdminOrMod ? `<button class="btn btn-danger btn-sm delete-thread-btn" data-thread-id="${thread.id}">Удалить</button>` : ''}</td>
         `;
+        // Левый клик - открытие темы (если не кнопка удаления)
         tr.addEventListener('click', (e) => {
             if (!e.target.classList.contains('delete-thread-btn')) {
                 openThreadDetail(thread.id);
+            }
+        });
+        // Правый клик - модальное окно выбора статуса (только для ADMIN/MODERATOR)
+        tr.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (isAdminOrMod) {
+                openStatusModal(thread);
             }
         });
         tbody.appendChild(tr);
@@ -301,6 +310,17 @@ function setupEventListeners() {
     document.getElementById('pinThreadBtn').addEventListener('click', () => changeThreadStatus('PINNED'));
     document.getElementById('closeThreadBtn').addEventListener('click', () => changeThreadStatus('CLOSED'));
     document.getElementById('hideThreadBtn').addEventListener('click', () => changeThreadStatus('HIDDEN'));
+
+    // Обработчик для кнопок выбора статуса в модальном окне
+    document.querySelectorAll('#statusModal button[data-status]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const status = this.dataset.status;
+            if (statusModalThread) {
+                changeThreadStatusById(statusModalThread.id, status);
+                document.getElementById('statusModal').style.display = 'none';
+            }
+        });
+    });
 
     // Формы
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
@@ -512,6 +532,29 @@ async function changeThreadStatus(status) {
     } catch (error) {
         showError('Ошибка изменения статуса: ' + error.message);
     }
+}
+
+// ========== Изменение статуса темы по ID (из модального окна статуса) ==========
+async function changeThreadStatusById(threadId, status) {
+    try {
+        await ForumAPI.updateThreadStatus(threadId, status);
+        showSuccess(`Статус темы изменен на ${status}`);
+
+        if (currentCategory) {
+            loadThreadsByCategory(currentCategory.id);
+        } else {
+            loadThreads();
+        }
+    } catch (error) {
+        showError('Ошибка изменения статуса: ' + error.message);
+    }
+}
+
+// ========== Открытие модального окна выбора статуса ==========
+function openStatusModal(thread) {
+    statusModalThread = thread;
+    document.getElementById('statusModalThreadTitle').textContent = `Тема: ${thread.title}`;
+    document.getElementById('statusModal').style.display = 'block';
 }
 
 // ========== Обновление панели модерации в модальном окне ==========
