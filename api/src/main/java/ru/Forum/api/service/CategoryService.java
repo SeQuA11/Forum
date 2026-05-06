@@ -18,10 +18,6 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final ThreadRepository threadRepository;  // ДОБАВЛЕНО!
 
-    public CategoryService(CategoryRepository categoryRepository, ThreadRepository threadRepository) {
-        this.categoryRepository = categoryRepository;
-        this.threadRepository = threadRepository;
-    }
 
     @Transactional(readOnly = true)
     public List<CategoryDTO> getAllActiveCategories() {

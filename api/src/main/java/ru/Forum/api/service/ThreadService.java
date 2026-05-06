@@ -27,11 +27,6 @@ public class ThreadService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
-    public ThreadService(ThreadRepository threadRepository, CategoryRepository categoryRepository, UserRepository userRepository) {
-        this.threadRepository = threadRepository;
-        this.categoryRepository = categoryRepository;
-        this.userRepository = userRepository;
-    }
 
     @Transactional(readOnly = true)
     public Page<ThreadResponseDTO> getActiveThreads(int page, int size) {
@@ -106,13 +101,13 @@ public class ThreadService {
         return convertToDTO(threadRepository.save(thread));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ThreadResponseDTO incrementViews(Long id) {
         Thread thread = threadRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Тема не найдена: " + id));
 
         thread.setViewsCount(thread.getViewsCount() + 1);
-        return convertToDTO(thread);
+        return convertToDTO(threadRepository.save(thread));
     }
 
     @Transactional(readOnly = true)

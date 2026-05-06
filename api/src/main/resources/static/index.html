@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форум - Главная</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Шапка -->
+        <header class="header">
+            <h1>Форум</h1>
+            <div class="user-info" id="userInfo" style="display: none;">
+                <span id="welcomeMessage"></span>
+                <span id="roleBadge" class="badge"></span>
+                <button id="logoutBtn" class="btn btn-secondary">Выход</button>
+            </div>
+            <div class="auth-buttons" id="authButtons">
+                <button id="loginBtn" class="btn btn-primary">Вход</button>
+                <button id="registerBtn" class="btn btn-secondary">Регистрация</button>
+            </div>
+        </header>
+
+        <!-- Основной контент -->
+        <main class="main-content">
+            <!-- Боковая панель с категориями -->
+            <aside class="sidebar">
+                <h2>Категории</h2>
+                <ul id="categoryList" class="category-list">
+                    <!-- Категории загружаются динамически -->
+                </ul>
+                
+                <!-- Панель модератора/админа -->
+                <div id="adminPanel" class="admin-panel" style="display: none;">
+                    <h3>Администрирование</h3>
+                    <button id="createCategoryBtn" class="btn btn-primary btn-block">Создать категорию</button>
+                </div>
+            </aside>
+
+            <!-- Основная область с темами -->
+            <section class="content-area">
+                <div class="toolbar">
+                    <h2 id="currentCategoryTitle">Все темы</h2>
+                    <div class="toolbar-buttons">
+                        <button id="createThreadBtn" class="btn btn-success">Создать тему</button>
+                        <button id="refreshBtn" class="btn btn-secondary">Обновить</button>
+                    </div>
+                </div>
+
+                <!-- Таблица тем -->
+                <table class="threads-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Автор</th>
+                            <th>Статус</th>
+                            <th>Просмотры</th>
+                            <th>Дата</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="threadsTableBody">
+                        <!-- Темы загружаются динамически -->
+                    </tbody>
+                </table>
+            </section>
+        </main>
+
+        <!-- Модальное окно создания/редактирования темы -->
+        <div id="threadModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modalTitle">Создать новую тему</h2>
+                <form id="threadForm">
+                    <div class="form-group">
+                        <label for="threadTitle">Заголовок:</label>
+                        <input type="text" id="threadTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="threadContent">Содержание:</label>
+                        <textarea id="threadContent" rows="5" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="threadCategory">Категория:</label>
+                        <select id="threadCategory" required>
+                            <!-- Категории загружаются динамически -->
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Опубликовать</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Модальное окно создания категории -->
+        <div id="categoryModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Создать категорию</h2>
+                <form id="categoryForm">
+                    <div class="form-group">
+                        <label for="categoryName">Название:</label>
+                        <input type="text" id="categoryName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryDescription">Описание:</label>
+                        <textarea id="categoryDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="categorySlug">URL (slug):</label>
+                        <input type="text" id="categorySlug" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Создать</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Модальное окно просмотра темы -->
+        <div id="viewThreadModal" class="modal" style="display: none;">
+            <div class="modal-content modal-large">
+                <span class="close">&times;</span>
+                <div class="modal-content-wrapper">
+                    <div class="thread-title-header">
+                        <h2 id="viewThreadTitle"></h2>
+                        <button id="deleteThreadModalBtn" class="btn btn-danger" style="display: none;">Удалить</button>
+                    </div>
+                    <div class="thread-meta">
+                        <span id="viewThreadAuthor"></span> | 
+                        <span id="viewThreadStatus" class="badge"></span> | 
+                        <span id="viewThreadDate"></span>
+                    </div>
+                    
+                    <!-- Панель модерации внутри темы -->
+                    <div id="threadModerationPanel" class="thread-moderation-panel" style="display: none;">
+                        <button id="activeThreadBtn" class="btn btn-success">Активна</button>
+                        <button id="pinThreadBtn" class="btn btn-warning">Закрепить</button>
+                        <button id="closeThreadBtn" class="btn btn-secondary">Закрыть</button>
+                        <button id="hideThreadBtn" class="btn btn-danger">Скрыть</button>
+                    </div>
+                    
+                    <div id="viewThreadContent" class="thread-content"></div>
+                    
+                    <h3>Ответы</h3>
+                    <div id="postsContainer" class="posts-container">
+                        <div id="postsList" class="posts-list">
+                            <!-- Посты загружаются динамически -->
+                        </div>
+                    </div>
+                    
+                    <div id="replySection" class="reply-section" style="display: none;">
+                        <h4>Добавить ответ</h4>
+                        <form id="replyForm">
+                            <div class="form-group">
+                                <textarea id="replyContent" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success">Отправить</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно входа -->
+        <div id="loginModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Вход</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginUsername">Имя пользователя:</label>
+                        <input type="text" id="loginUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Пароль:</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Войти</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Модальное окно регистрации -->
+        <div id="registerModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Регистрация</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="registerUsername">Имя пользователя:</label>
+                        <input type="text" id="registerUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Пароль:</label>
+                        <input type="password" id="registerPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Модальное окно выбора статуса темы (контекстное меню) -->
+        <div id="statusModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Изменить статус темы</h2>
+                <p id="statusModalThreadTitle" style="margin-bottom: 15px; color: #666;"></p>
+                <div class="status-options">
+                    <button data-status="ACTIVE" class="btn btn-success btn-block">ACTIVE (Активна)</button>
+                    <button data-status="PINNED" class="btn btn-warning btn-block">PINNED (Закреплена)</button>
+                    <button data-status="CLOSED" class="btn btn-secondary btn-block">CLOSED (Закрыта)</button>
+                    <button data-status="HIDDEN" class="btn btn-danger btn-block">HIDDEN (Скрыта)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
