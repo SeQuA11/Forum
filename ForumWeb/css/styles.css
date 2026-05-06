@@ -254,6 +254,14 @@ body {
     display: flex;
     flex-direction: column;
     margin: 5% auto;
+    overflow: hidden;
+}
+
+.modal-large .modal-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
 }
 
 .modal-large .thread-meta,

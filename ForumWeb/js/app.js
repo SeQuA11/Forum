@@ -53,6 +53,9 @@ async function loadCategories() {
         const categoryList = document.getElementById('categoryList');
         const threadCategory = document.getElementById('threadCategory');
 
+        // Очищаем список перед заполнением, чтобы избежать дублирования
+        categoryList.innerHTML = '';
+        
         // Создаем элемент "Все категории" с обработчиком
         const allLi = document.createElement('li');
         allLi.textContent = 'Все категории';
