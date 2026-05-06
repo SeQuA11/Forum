@@ -251,6 +251,7 @@ function setupEventListeners() {
 
     // Кнопки управления темами
     document.getElementById('deleteThreadBtn').addEventListener('click', deleteSelectedThread);
+    document.getElementById('deleteThreadModalBtn').addEventListener('click', deleteSelectedThread);
     document.getElementById('refreshBtn').addEventListener('click', () => {
         if (currentCategory) {
             loadThreadsByCategory(currentCategory.id);
@@ -463,6 +464,12 @@ function updateThreadModerationPanel() {
     
     const isAdminOrMod = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role);
     moderationPanel.style.display = isAdminOrMod ? 'flex' : 'none';
+    
+    // Обновляем кнопку удаления в модальном окне
+    const deleteBtnModal = document.getElementById('deleteThreadModalBtn');
+    if (deleteBtnModal) {
+        deleteBtnModal.style.display = isAdminOrMod ? 'inline-block' : 'none';
+    }
 }
 
 // ========== Выход ==========
