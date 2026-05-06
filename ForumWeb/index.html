@@ -120,37 +120,39 @@
         <div id="viewThreadModal" class="modal" style="display: none;">
             <div class="modal-content modal-large">
                 <span class="close">&times;</span>
-                <h2 id="viewThreadTitle"></h2>
-                <div class="thread-meta">
-                    <span id="viewThreadAuthor"></span> | 
-                    <span id="viewThreadStatus" class="badge"></span> | 
-                    <span id="viewThreadDate"></span>
-                </div>
-                
-                <!-- Панель модерации внутри темы -->
-                <div id="threadModerationPanel" class="thread-moderation-panel" style="display: none;">
-                    <button id="pinThreadBtn" class="btn btn-warning">Закрепить</button>
-                    <button id="closeThreadBtn" class="btn btn-warning">Закрыть</button>
-                    <button id="hideThreadBtn" class="btn btn-warning">Скрыть</button>
-                </div>
-                
-                <div id="viewThreadContent" class="thread-content"></div>
-                
-                <h3>Ответы</h3>
-                <div id="postsContainer" class="posts-container">
-                    <div id="postsList" class="posts-list">
-                        <!-- Посты загружаются динамически -->
+                <div class="modal-content-wrapper">
+                    <h2 id="viewThreadTitle"></h2>
+                    <div class="thread-meta">
+                        <span id="viewThreadAuthor"></span> | 
+                        <span id="viewThreadStatus" class="badge"></span> | 
+                        <span id="viewThreadDate"></span>
                     </div>
-                </div>
-                
-                <div id="replySection" class="reply-section" style="display: none;">
-                    <h4>Добавить ответ</h4>
-                    <form id="replyForm">
-                        <div class="form-group">
-                            <textarea id="replyContent" rows="4" required></textarea>
+                    
+                    <!-- Панель модерации внутри темы -->
+                    <div id="threadModerationPanel" class="thread-moderation-panel" style="display: none;">
+                        <button id="pinThreadBtn" class="btn btn-warning">Закрепить</button>
+                        <button id="closeThreadBtn" class="btn btn-warning">Закрыть</button>
+                        <button id="hideThreadBtn" class="btn btn-warning">Скрыть</button>
+                    </div>
+                    
+                    <div id="viewThreadContent" class="thread-content"></div>
+                    
+                    <h3>Ответы</h3>
+                    <div id="postsContainer" class="posts-container">
+                        <div id="postsList" class="posts-list">
+                            <!-- Посты загружаются динамически -->
                         </div>
-                        <button type="submit" class="btn btn-success">Отправить</button>
-                    </form>
+                    </div>
+                    
+                    <div id="replySection" class="reply-section" style="display: none;">
+                        <h4>Добавить ответ</h4>
+                        <form id="replyForm">
+                            <div class="form-group">
+                                <textarea id="replyContent" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success">Отправить</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
