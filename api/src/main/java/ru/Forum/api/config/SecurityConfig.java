@@ -54,9 +54,15 @@ public class SecurityConfig {
                         // Статические ресурсы
                         .requestMatchers("/", "/index.html", "/css/**", "/js/**", "/images/**").permitAll()
 
-                        // GET запросы к категориям и темам - публичные
+                        // GET запросы к категориям и темам - публичные (для анонимных пользователей)
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**", "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/threads/**", "/api/threads/**").permitAll()
+
+                        // POST, PUT, DELETE запросы к темам требуют аутентификации
+                        .requestMatchers(HttpMethod.POST, "/api/v1/threads/**", "/api/threads/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/threads/**", "/api/threads/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/threads/**", "/api/threads/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/threads/**", "/api/threads/**").authenticated()
 
                         // Все остальные запросы требуют аутентификации
                         .anyRequest().authenticated()
