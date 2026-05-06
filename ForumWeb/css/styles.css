@@ -183,6 +183,7 @@ body {
 .toolbar-buttons {
     display: flex;
     gap: 10px;
+    margin-left: auto;
 }
 
 /* Таблица тем */
@@ -209,21 +210,20 @@ body {
     cursor: pointer;
 }
 
-/* Панель модерации */
-.moderation-panel {
-    margin-top: 20px;
+/* Панель модерации внутри темы */
+.thread-moderation-panel {
+    margin: 15px 0;
     padding: 15px;
     background-color: #fff3cd;
     border-radius: 5px;
     border-left: 4px solid #ffc107;
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
-.moderation-panel h3 {
-    margin-bottom: 10px;
-}
-
-.moderation-panel button {
-    margin-right: 10px;
+.thread-moderation-panel button {
+    margin-right: 0;
 }
 
 /* Модальные окна */
@@ -253,11 +253,13 @@ body {
     max-height: 80vh;
     display: flex;
     flex-direction: column;
+    margin: 5% auto;
 }
 
 .modal-large .thread-meta,
 .modal-large .thread-content,
-.modal-large h3 {
+.modal-large h3,
+.modal-large .thread-moderation-panel {
     flex-shrink: 0;
 }
 
