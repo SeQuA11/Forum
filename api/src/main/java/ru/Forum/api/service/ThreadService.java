@@ -106,13 +106,13 @@ public class ThreadService {
         return convertToDTO(threadRepository.save(thread));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ThreadResponseDTO incrementViews(Long id) {
         Thread thread = threadRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Тема не найдена: " + id));
 
         thread.setViewsCount(thread.getViewsCount() + 1);
-        return convertToDTO(thread);
+        return convertToDTO(threadRepository.save(thread));
     }
 
     @Transactional(readOnly = true)
