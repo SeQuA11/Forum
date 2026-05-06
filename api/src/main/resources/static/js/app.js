@@ -75,7 +75,7 @@ async function loadCategories() {
         allLi.addEventListener('click', selectAllCategories);
         categoryList.appendChild(allLi);
         
-        threadCategory.innerHTML = '';
+        threadCategory.innerHTML = '<option value="" disabled selected>Выберите категорию</option>';
 
         if (categories && categories.length > 0) {
             categories.forEach(cat => {
@@ -94,7 +94,6 @@ async function loadCategories() {
             });
         } else {
             categoryList.innerHTML += '<li class="no-data">Нет доступных категорий</li>';
-            threadCategory.innerHTML = '<option value="">Нет категорий</option>';
         }
     } catch (error) {
         console.error('Ошибка загрузки категорий:', error);
@@ -395,23 +394,49 @@ async function handleRegister(e) {
 
 async function handleCreateThread(e) {
     e.preventDefault();
-    const title = document.getElementById('threadTitle').value;
-    const content = document.getElementById('threadContent').value;
-    const categoryId = document.getElementById('threadCategory').value;
+    const title = document.getElementById('threadTitle').value.trim();
+    const content = document.getElementById('threadContent').value.trim();
+    const categoryIdStr = document.getElementById('threadCategory').value;
+    
+    // Проверка заполненности полей
+    if (!title || title.length < 5) {
+        showError('Заголовок должен содержать минимум 5 символов');
+        return;
+    }
+    if (!content || content.length < 10) {
+        showError('Содержание должно содержать минимум 10 символов');
+        return;
+    }
+    if (!categoryIdStr) {
+        showError('Выберите категорию');
+        return;
+    }
+
+    const categoryId = parseInt(categoryIdStr, 10);
+    
+    console.log('Отправка данных темы:', { title, content, categoryId });
 
     try {
-        await ForumAPI.createThread(title, content, parseInt(categoryId));
+        const result = await ForumAPI.createThread(title, content, categoryId);
+        console.log('Тема создана:', result);
         document.getElementById('threadModal').style.display = 'none';
         document.getElementById('threadForm').reset();
-        showSuccess('Тема создана!');
-
+        showSuccess('Тема создана успешно!');
+        
         if (currentCategory) {
             loadThreadsByCategory(currentCategory.id);
         } else {
             loadThreads();
         }
     } catch (error) {
-        showError('Ошибка создания темы: ' + error.message);
+        console.error('Ошибка создания темы:', error);
+        let errorMsg = 'Ошибка создания темы: ';
+        if (error.message.includes('Ошибка валидации')) {
+            errorMsg += 'Проверьте правильность заполнения всех полей';
+        } else {
+            errorMsg += error.message;
+        }
+        showError(errorMsg);
     }
 }
 
