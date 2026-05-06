@@ -190,7 +190,6 @@ function renderThreads(threads) {
         const pinIcon = isPinned ? '<span class="pin-icon" title="Закрепленная тема">📌 </span>' : '';
         
         tr.innerHTML = `
-        <td>${thread.id}</td>
         <td>${pinIcon}${escapeHtml(thread.title)}</td>
         <td>${escapeHtml(thread.authorUsername || 'Неизвестно')}</td>
         <td><span class="badge">${thread.status || 'ACTIVE'}</span></td>
