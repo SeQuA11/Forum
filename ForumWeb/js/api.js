@@ -1,5 +1,5 @@
 // API конфигурация
-const API_BASE_URL = '/api/v1';
+const API_BASE_URL = window.location.origin + '/api/v1';
 
 // Состояние приложения
 const AppState = {
