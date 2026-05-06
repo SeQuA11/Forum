@@ -51,7 +51,14 @@ async function loadCategories() {
         const categoryList = document.getElementById('categoryList');
         const threadCategory = document.getElementById('threadCategory');
 
-        categoryList.innerHTML = '<li data-id="all" class="active">Все категории</li>';
+        // Создаем элемент "Все категории" с обработчиком
+        const allLi = document.createElement('li');
+        allLi.textContent = 'Все категории';
+        allLi.dataset.id = 'all';
+        allLi.classList.add('active');
+        allLi.addEventListener('click', selectAllCategories);
+        categoryList.appendChild(allLi);
+        
         threadCategory.innerHTML = '';
 
         if (categories && categories.length > 0) {
@@ -89,11 +96,32 @@ function selectCategory(category) {
     document.querySelectorAll('#categoryList li').forEach(li => {
         li.classList.remove('active');
     });
-    document.querySelector(`#categoryList li[data-id="${category.id}"]`).classList.add('active');
+    const activeLi = document.querySelector(`#categoryList li[data-id="${category.id}"]`);
+    if (activeLi) {
+        activeLi.classList.add('active');
+    } else {
+        // Если категория не найдена по id, активируем "Все категории"
+        document.querySelector('#categoryList li[data-id="all"]').classList.add('active');
+    }
 
     document.getElementById('currentCategoryTitle').textContent = `Категория: ${category.name}`;
 
     loadThreadsByCategory(category.id);
+}
+
+// ========== Выбор всех категорий ==========
+function selectAllCategories() {
+    currentCategory = null;
+
+    // Обновляем активный элемент в списке
+    document.querySelectorAll('#categoryList li').forEach(li => {
+        li.classList.remove('active');
+    });
+    document.querySelector('#categoryList li[data-id="all"]').classList.add('active');
+
+    document.getElementById('currentCategoryTitle').textContent = 'Все темы';
+
+    loadThreads();
 }
 
 // ========== Загрузка тем ==========

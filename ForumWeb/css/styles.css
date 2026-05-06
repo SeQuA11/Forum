@@ -250,6 +250,30 @@ body {
 
 .modal-large {
     max-width: 800px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-large .thread-meta,
+.modal-large .thread-content,
+.modal-large h3 {
+    flex-shrink: 0;
+}
+
+.posts-container {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 200px;
+    max-height: 400px;
+    margin: 15px 0;
+}
+
+.reply-section {
+    flex-shrink: 0;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
 }
 
 .close {
