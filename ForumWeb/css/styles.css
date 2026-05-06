@@ -291,10 +291,19 @@ body {
 }
 
 .modal-large .thread-meta,
-.modal-large .thread-content,
-.modal-large h3,
 .modal-large .thread-moderation-panel {
     flex-shrink: 0;
+}
+
+.modal-large .thread-content {
+    flex-shrink: 0;
+    margin-bottom: 15px;
+}
+
+.modal-large h3 {
+    flex-shrink: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .posts-container {
