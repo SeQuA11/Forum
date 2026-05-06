@@ -42,9 +42,11 @@
             <section class="content-area">
                 <div class="toolbar">
                     <h2 id="currentCategoryTitle">Все темы</h2>
-                    <button id="createThreadBtn" class="btn btn-success">Создать тему</button>
-                    <button id="deleteThreadBtn" class="btn btn-danger" style="display: none;">Удалить тему</button>
-                    <button id="refreshBtn" class="btn btn-secondary">Обновить</button>
+                    <div class="toolbar-buttons">
+                        <button id="createThreadBtn" class="btn btn-success">Создать тему</button>
+                        <button id="deleteThreadBtn" class="btn btn-danger" style="display: none;">Удалить тему</button>
+                        <button id="refreshBtn" class="btn btn-secondary">Обновить</button>
+                    </div>
                 </div>
 
                 <!-- Таблица тем -->
@@ -63,14 +65,6 @@
                         <!-- Темы загружаются динамически -->
                     </tbody>
                 </table>
-
-                <!-- Модерация тем -->
-                <div id="moderationPanel" class="moderation-panel" style="display: none;">
-                    <h3>Модерация</h3>
-                    <button id="pinThreadBtn" class="btn btn-warning">Закрепить</button>
-                    <button id="closeThreadBtn" class="btn btn-warning">Закрыть</button>
-                    <button id="hideThreadBtn" class="btn btn-warning">Скрыть</button>
-                </div>
             </section>
         </main>
 
@@ -132,6 +126,14 @@
                     <span id="viewThreadStatus" class="badge"></span> | 
                     <span id="viewThreadDate"></span>
                 </div>
+                
+                <!-- Панель модерации внутри темы -->
+                <div id="threadModerationPanel" class="thread-moderation-panel" style="display: none;">
+                    <button id="pinThreadBtn" class="btn btn-warning">Закрепить</button>
+                    <button id="closeThreadBtn" class="btn btn-warning">Закрыть</button>
+                    <button id="hideThreadBtn" class="btn btn-warning">Скрыть</button>
+                </div>
+                
                 <div id="viewThreadContent" class="thread-content"></div>
                 
                 <h3>Ответы</h3>

@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCategories();
     loadThreads();
     setupEventListeners();
+    
+    // Показываем панель модерации в модальном окне для авторизованных пользователей
+    updateThreadModerationPanel();
 });
 
 // Глобальные переменные
@@ -32,16 +35,15 @@ function initAuth() {
 
         // Показываем кнопку удаления темы для модераторов и админов
         document.getElementById('deleteThreadBtn').style.display = isAdminOrMod ? 'inline-block' : 'none';
-
-        // Показываем панель модерации
-        document.getElementById('moderationPanel').style.display = isAdminOrMod ? 'block' : 'none';
     } else {
         userInfo.style.display = 'none';
         authButtons.style.display = 'flex';
         document.getElementById('adminPanel').style.display = 'none';
         document.getElementById('deleteThreadBtn').style.display = 'none';
-        document.getElementById('moderationPanel').style.display = 'none';
     }
+    
+    // Обновляем панель модерации в модальном окне
+    updateThreadModerationPanel();
 }
 
 // ========== Загрузка категорий ==========
@@ -207,6 +209,9 @@ async function openThreadDetail(threadId) {
 
         // Показываем секцию ответа если пользователь авторизован
         document.getElementById('replySection').style.display = AppState.currentUser ? 'block' : 'none';
+
+        // Обновляем панель модерации в модальном окне
+        updateThreadModerationPanel();
 
         // Открываем модальное окно
         document.getElementById('viewThreadModal').style.display = 'block';
@@ -446,6 +451,15 @@ async function changeThreadStatus(status) {
     } catch (error) {
         showError('Ошибка изменения статуса: ' + error.message);
     }
+}
+
+// ========== Обновление панели модерации в модальном окне ==========
+function updateThreadModerationPanel() {
+    const moderationPanel = document.getElementById('threadModerationPanel');
+    if (!moderationPanel) return;
+    
+    const isAdminOrMod = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role);
+    moderationPanel.style.display = isAdminOrMod ? 'flex' : 'none';
 }
 
 // ========== Выход ==========
