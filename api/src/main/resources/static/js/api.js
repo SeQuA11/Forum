@@ -144,6 +144,12 @@ const ForumAPI = {
         return await this.request(`/threads/${id}/view`);
     },
 
+    async togglePin(id) {
+        return await this.request(`/threads/${id}/pin`, {
+            method: 'POST'
+        });
+    },
+
     // ========== Сообщения ==========
 
     async getPosts(threadId, page = 0, size = 100) {

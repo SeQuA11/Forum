@@ -135,4 +135,18 @@ public class ThreadController {
         threadService.delete(id, username);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/pin")
+    @Operation(summary = "Закрепить/открепить тему для текущего пользователя")
+    @ApiResponse(responseCode = "200", description = "Статус закрепления изменен")
+    @ApiResponse(responseCode = "404", description = "Тема не найдена")
+    public ResponseEntity<ThreadResponseDTO> togglePin(@PathVariable Long id) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            throw new RuntimeException("Требуется аутентификация для закрепления темы");
+        }
+        String username = authentication.getName();
+        ThreadResponseDTO result = threadService.togglePin(id, username);
+        return ResponseEntity.ok(result);
+    }
 }

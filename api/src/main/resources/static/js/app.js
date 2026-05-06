@@ -200,11 +200,15 @@ function renderThreads(threads) {
 
     sortedThreads.forEach(thread => {
         const tr = document.createElement('tr');
-        const isPinned = thread.status === 'PINNED';
-        const pinIcon = isPinned ? '<span class="pin-icon" title="Закрепленная тема">📌 </span>' : '';
+        const pinIcon = thread.pinned ? '<span class="pin-icon" title="Закрепленная тема">📌 </span>' : '';
         
         // Ячейка со статусом только для администраторов и модераторов
         const statusCell = isAdminOrMod ? `<td><span class="badge">${thread.status || 'ACTIVE'}</span></td>` : '';
+        
+        // Кнопка закрепления/открепления для всех авторизованных пользователей
+        const pinButton = AppState.currentUser 
+            ? `<button class="btn btn-sm ${thread.pinned ? 'btn-warning' : 'btn-outline'} pin-thread-btn" data-thread-id="${thread.id}" title="${thread.pinned ? 'Открепить' : 'Закрепить'}">${thread.pinned ? '📍' : '📌'}</button>` 
+            : '';
         
         tr.innerHTML = `
         <td>${pinIcon}${escapeHtml(thread.title)}</td>
@@ -212,14 +216,23 @@ function renderThreads(threads) {
         ${statusCell}
         <td>${thread.viewsCount || 0}</td>
         <td>${formatDate(thread.createdAt)}</td>
+        <td>${pinButton}</td>
         <td>${isAdminOrMod ? `<button class="btn btn-danger btn-sm delete-thread-btn" data-thread-id="${thread.id}">Удалить</button>` : ''}</td>
         `;
-        // Левый клик - открытие темы (если не кнопка удаления)
+        // Левый клик - открытие темы (если не кнопка удаления или закрепления)
         tr.addEventListener('click', (e) => {
-            if (!e.target.classList.contains('delete-thread-btn')) {
+            if (!e.target.classList.contains('delete-thread-btn') && !e.target.classList.contains('pin-thread-btn')) {
                 openThreadDetail(thread.id);
             }
         });
+        // Обработчик для кнопки закрепления
+        const pinBtn = tr.querySelector('.pin-thread-btn');
+        if (pinBtn) {
+            pinBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleThreadPin(thread.id);
+            });
+        }
         // Правый клик - модальное окно выбора статуса (только для ADMIN/MODERATOR)
         tr.addEventListener('contextmenu', (e) => {
             e.preventDefault();
@@ -543,6 +556,29 @@ async function changeThreadStatusById(threadId, status) {
         }
     } catch (error) {
         showError('Ошибка изменения статуса: ' + error.message);
+    }
+}
+
+// ========== Закрепить/открепить тему ==========
+async function toggleThreadPin(threadId) {
+    if (!AppState.currentUser) {
+        showError('Сначала войдите в систему');
+        return;
+    }
+
+    try {
+        const result = await ForumAPI.togglePin(threadId);
+        const action = result.pinned ? 'Закреплена' : 'Откреплена';
+        showSuccess(`Тема ${action.toLowerCase()}!`);
+
+        // Обновляем отображение
+        if (currentCategory) {
+            loadThreadsByCategory(currentCategory.id);
+        } else {
+            loadThreads();
+        }
+    } catch (error) {
+        showError('Ошибка закрепления темы: ' + error.message);
     }
 }
 

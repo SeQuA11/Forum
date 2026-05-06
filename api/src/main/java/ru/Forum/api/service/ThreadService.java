@@ -13,10 +13,12 @@ import ru.Forum.api.entity.*;
 import ru.Forum.api.entity.Thread;
 import ru.Forum.api.repository.CategoryRepository;
 import ru.Forum.api.repository.ThreadRepository;
+import ru.Forum.api.repository.UserPinnedThreadRepository;
 import ru.Forum.api.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +28,7 @@ public class ThreadService {
     private final ThreadRepository threadRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final UserPinnedThreadRepository userPinnedThreadRepository;
 
 
     @Transactional(readOnly = true)
@@ -133,7 +136,18 @@ public class ThreadService {
             threads = threadRepository.findByStatus(ThreadStatus.ACTIVE, pageable);
         }
 
-        return threads.map(this::convertToDTO);
+        // Получаем список закрепленных тем для текущего пользователя
+        Set<Long> pinnedThreadIds = userPinnedThreadRepository.findByUserId(user.getId())
+                .stream()
+                .map(upt -> upt.getThread().getId())
+                .collect(Collectors.toSet());
+
+        // Конвертируем в DTO с учетом закрепленных тем
+        return threads.map(thread -> {
+            ThreadResponseDTO dto = convertToDTO(thread);
+            dto.setPinned(pinnedThreadIds.contains(thread.getId()));
+            return dto;
+        });
     }
 
     @Transactional(readOnly = true)
@@ -158,7 +172,18 @@ public class ThreadService {
             threads = threadRepository.findByCategoryIdAndStatus(categoryId, ThreadStatus.ACTIVE, pageable);
         }
 
-        return threads.map(this::convertToDTO);
+        // Получаем список закрепленных тем для текущего пользователя
+        Set<Long> pinnedThreadIds = userPinnedThreadRepository.findByUserId(user.getId())
+                .stream()
+                .map(upt -> upt.getThread().getId())
+                .collect(Collectors.toSet());
+
+        // Конвертируем в DTO с учетом закрепленных тем
+        return threads.map(thread -> {
+            ThreadResponseDTO dto = convertToDTO(thread);
+            dto.setPinned(pinnedThreadIds.contains(thread.getId()));
+            return dto;
+        });
     }
 
     // Метод для удаления темы
@@ -178,6 +203,31 @@ public class ThreadService {
         }
 
         threadRepository.delete(thread);
+    }
+
+    @Transactional
+    public ThreadResponseDTO togglePin(Long threadId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
+
+        Thread thread = threadRepository.findById(threadId)
+                .orElseThrow(() -> new RuntimeException("Тема не найдена: " + threadId));
+
+        boolean isPinned = userPinnedThreadRepository.existsByUserIdAndThreadId(user.getId(), threadId);
+
+        if (isPinned) {
+            // Открепить тему
+            userPinnedThreadRepository.deleteByUserIdAndThreadId(user.getId(), threadId);
+        } else {
+            // Закрепить тему
+            UserPinnedThread pinned = new UserPinnedThread(user, thread);
+            userPinnedThreadRepository.save(pinned);
+        }
+
+        // Возвращаем обновленную тему с новым статусом закрепления
+        ThreadResponseDTO dto = convertToDTO(thread);
+        dto.setPinned(!isPinned);
+        return dto;
     }
 
     private ThreadResponseDTO convertToDTO(Thread thread) {
