@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.Forum.api.dto.CategoryDTO;
 import ru.Forum.api.entity.Category;
 import ru.Forum.api.repository.CategoryRepository;
+import ru.Forum.api.repository.ThreadRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,9 +16,11 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ThreadRepository threadRepository;  // ДОБАВЛЕНО!
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, ThreadRepository threadRepository) {
         this.categoryRepository = categoryRepository;
+        this.threadRepository = threadRepository;
     }
 
     @Transactional(readOnly = true)
@@ -59,6 +62,13 @@ public class CategoryService {
         if (!categoryRepository.existsById(id)) {
             throw new RuntimeException("Категория не найдена: " + id);
         }
+
+        // Проверяем, есть ли темы в категории
+        long threadCount = threadRepository.countByCategoryId(id);
+        if (threadCount > 0) {
+            throw new RuntimeException("Нельзя удалить категорию с темами. Сначала удалите " + threadCount + " тем.");
+        }
+
         categoryRepository.deleteById(id);
     }
 

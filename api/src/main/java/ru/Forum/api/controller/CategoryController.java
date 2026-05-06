@@ -61,7 +61,8 @@ public class CategoryController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Удалить категорию (только для админов)")
     @ApiResponse(responseCode = "204", description = "Категория удалена")
-    @ApiResponse(responseCode = "403", description = "Нет прав доступа")
+    @ApiResponse(responseCode = "400", description = "Категория не пуста")
+    @ApiResponse(responseCode = "403", description = "Нет прав")
     @ApiResponse(responseCode = "404", description = "Категория не найдена")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.delete(id);

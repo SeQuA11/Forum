@@ -1,4 +1,4 @@
-package ru.forum.forumd;
+package ru.forum.forumd.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

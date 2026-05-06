@@ -12,8 +12,13 @@ import java.util.List;
 
 @Repository
 public interface ThreadRepository extends JpaRepository<Thread, Long> {
-    Page<Thread> findByCategoryIdAndStatus(Long categoryId, ThreadStatus status, Pageable pageable);
     List<Thread> findByStatus(ThreadStatus status);
+    Page<Thread> findByStatus(ThreadStatus status, Pageable pageable);
+    Page<Thread> findByStatusNot(ThreadStatus status, Pageable pageable);
+    Page<Thread> findByCategoryIdAndStatus(Long categoryId, ThreadStatus status, Pageable pageable);
+    Page<Thread> findByCategoryIdAndStatusNot(Long categoryId, ThreadStatus status, Pageable pageable);
+    Page<Thread> findByCategoryId(Long categoryId, Pageable pageable);
+    long countByCategoryId(Long categoryId);
 
     @Query("SELECT t FROM Thread t WHERE t.status = 'ACTIVE' ORDER BY t.createdAt DESC")
     Page<Thread> findActiveThreads(Pageable pageable);

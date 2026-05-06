@@ -27,25 +27,6 @@ public class ThreadController {
         this.threadService = threadService;
     }
 
-    @GetMapping
-    @Operation(summary = "Получить список активных тем")
-    @ApiResponse(responseCode = "200", description = "Список тем")
-    public ResponseEntity<Page<ThreadResponseDTO>> getAllThreads(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(threadService.getActiveThreads(page, size));
-    }
-
-    @GetMapping("/category/{categoryId}")
-    @Operation(summary = "Получить темы по категории")
-    @ApiResponse(responseCode = "200", description = "Список тем категории")
-    public ResponseEntity<Page<ThreadResponseDTO>> getThreadsByCategory(
-            @PathVariable Long categoryId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(threadService.getThreadsByCategory(categoryId, page, size));
-    }
-
     @GetMapping("/{id}")
     @Operation(summary = "Получить тему по ID")
     @ApiResponse(responseCode = "200", description = "Данные темы")
@@ -81,17 +62,6 @@ public class ThreadController {
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
-    @Operation(summary = "Удалить тему (автор, модератор или админ)")
-    @ApiResponse(responseCode = "204", description = "Тема удалена")
-    @ApiResponse(responseCode = "403", description = "Нет прав")
-    @ApiResponse(responseCode = "404", description = "Тема не найдена")
-    public ResponseEntity<Void> deleteThread(@PathVariable Long id) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        threadService.delete(id, username);
-        return ResponseEntity.noContent().build();
-    }
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('MODERATOR', 'ADMIN')")
@@ -112,5 +82,40 @@ public class ThreadController {
     @ApiResponse(responseCode = "404", description = "Тема не найдена")
     public ResponseEntity<ThreadResponseDTO> viewThread(@PathVariable Long id) {
         return ResponseEntity.ok(threadService.incrementViews(id));
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
+    @Operation(summary = "Получить список тем (с учётом прав)")
+    @ApiResponse(responseCode = "200", description = "Список тем")
+    public ResponseEntity<Page<ThreadResponseDTO>> getAllThreads(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(threadService.getActiveThreads(page, size, username));
+    }
+
+    @GetMapping("/category/{categoryId}")
+    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
+    @Operation(summary = "Получить темы по категории (с учётом прав)")
+    @ApiResponse(responseCode = "200", description = "Список тем категории")
+    public ResponseEntity<Page<ThreadResponseDTO>> getThreadsByCategory(
+            @PathVariable Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(threadService.getThreadsByCategory(categoryId, page, size, username));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
+    @Operation(summary = "Удалить тему")
+    @ApiResponse(responseCode = "204", description = "Тема удалена")
+    @ApiResponse(responseCode = "403", description = "Нет прав")
+    @ApiResponse(responseCode = "404", description = "Тема не найдена")
+    public ResponseEntity<Void> deleteThread(@PathVariable Long id) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        threadService.delete(id, username);
+        return ResponseEntity.noContent().build();
     }
 }
