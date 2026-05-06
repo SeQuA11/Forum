@@ -307,6 +307,7 @@ function setupEventListeners() {
     });
 
     // Модерация
+    document.getElementById('activeThreadBtn').addEventListener('click', () => changeThreadStatus('ACTIVE'));
     document.getElementById('pinThreadBtn').addEventListener('click', () => changeThreadStatus('PINNED'));
     document.getElementById('closeThreadBtn').addEventListener('click', () => changeThreadStatus('CLOSED'));
     document.getElementById('hideThreadBtn').addEventListener('click', () => changeThreadStatus('HIDDEN'));
