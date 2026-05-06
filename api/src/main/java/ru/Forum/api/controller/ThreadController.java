@@ -33,6 +33,7 @@ public class ThreadController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @Operation(summary = "Создать новую тему")
     @ApiResponse(responseCode = "201", description = "Тема создана")
     @ApiResponse(responseCode = "400", description = "Ошибка валидации")
@@ -44,6 +45,7 @@ public class ThreadController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @Operation(summary = "Обновить тему (автор или модератор)")
     @ApiResponse(responseCode = "200", description = "Тема обновлена")
     @ApiResponse(responseCode = "400", description = "Ошибка валидации")
@@ -111,6 +113,7 @@ public class ThreadController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @Operation(summary = "Удалить тему")
     @ApiResponse(responseCode = "204", description = "Тема удалена")
     @ApiResponse(responseCode = "403", description = "Нет прав")
