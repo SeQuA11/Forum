@@ -30,6 +30,7 @@ public class WebController {
         this.userService = userService;
     }
 
+
     // Страница входа
     @GetMapping("/login")
     public String loginPage() {
