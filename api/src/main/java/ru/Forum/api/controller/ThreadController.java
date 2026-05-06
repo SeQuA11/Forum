@@ -87,7 +87,10 @@ public class ThreadController {
             @RequestParam(defaultValue = "20") int size) {
         String username = null;
         try {
-            username = SecurityContextHolder.getContext().getAuthentication().getName();
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                username = auth.getName();
+            }
         } catch (Exception e) {
             // Анонимный пользователь
         }
