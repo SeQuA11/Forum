@@ -1,26 +1,41 @@
 ```
+# Compiled and build artifacts
+*.class
+*.o
+*.obj
+*.out
+build/
+target/
+
 # Dependencies
-node_modules/
+.gradle/
+lib/
+vendor/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
 
 # Environment
 .env
 .env.local
-.env.*
+*.env.*
 
-# Build artifacts
-target/
-
-# IDE
+# Editors
 .vscode/
 .idea/
-
-# Logs
-*.log
-
-# Temporary files
-*.tmp
 *.swp
+*.swo
 
-# Package lock files
-package-lock.json
+# Java specific
+*.jar
+*.war
+*.ear
+!*.java
+
+# Maven/Gradle
+target/
+.gradle/
+build/
 ```

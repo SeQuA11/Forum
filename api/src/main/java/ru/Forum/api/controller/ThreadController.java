@@ -82,25 +82,33 @@ public class ThreadController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @Operation(summary = "Получить список тем (с учётом прав)")
     @ApiResponse(responseCode = "200", description = "Список тем")
     public ResponseEntity<Page<ThreadResponseDTO>> getAllThreads(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = null;
+        try {
+            username = SecurityContextHolder.getContext().getAuthentication().getName();
+        } catch (Exception e) {
+            // Анонимный пользователь
+        }
         return ResponseEntity.ok(threadService.getActiveThreads(page, size, username));
     }
 
     @GetMapping("/category/{categoryId}")
-    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @Operation(summary = "Получить темы по категории (с учётом прав)")
     @ApiResponse(responseCode = "200", description = "Список тем категории")
     public ResponseEntity<Page<ThreadResponseDTO>> getThreadsByCategory(
             @PathVariable Long categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = null;
+        try {
+            username = SecurityContextHolder.getContext().getAuthentication().getName();
+        } catch (Exception e) {
+            // Анонимный пользователь
+        }
         return ResponseEntity.ok(threadService.getThreadsByCategory(categoryId, page, size, username));
     }
 
