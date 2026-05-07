@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${thread.title}">Тема</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .post { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .post-header { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+        .author { font-weight: bold; color: #333; }
+        .date { color: #888; font-size: 0.9em; }
+        .content { line-height: 1.6; }
+        .back-link { display: inline-block; margin-bottom: 15px; color: #007bff; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+        .reply-form { background: #fff; padding: 20px; border-radius: 8px; margin-top: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        textarea { width: 100%; min-height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/forum" class="back-link">&larr; Вернуться к форуму</a>
+    
+    <div class="header">
+        <h1 th:text="${thread.title}">Заголовок темы</h1>
+        <p><span class="author" th:text="${thread.authorUsername}">Автор</span></p>
+        <p class="date" th:text="${#temporals.format(thread.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</p>
+        <div class="content" th:text="${thread.content}">Содержимое темы</div>
+    </div>
+    
+    <div th:each="post : ${posts}" class="post">
+        <div class="post-header">
+            <span class="author" th:text="${post.authorUsername}">Автор поста</span>
+            <span class="date" th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span>
+        </div>
+        <div class="content" th:text="${post.content}">Содержимое поста</div>
+    </div>
+    
+    <div th:if="${username != null and username != 'anonymousUser'}" class="reply-form">
+        <h3>Ответить</h3>
+        <form id="replyForm">
+            <textarea id="content" placeholder="Введите ваш ответ..." required></textarea>
+            <button type="submit">Отправить</button>
+        </form>
+    </div>
+    
+    <div th:unless="${username != null and username != 'anonymousUser'}">
+        <p><a href="/login">Войдите</a>, чтобы ответить</p>
+    </div>
+</div>
+
+<script>
+document.getElementById('replyForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const content = document.getElementById('content').value;
+    const threadId = window.location.pathname.split('/').pop();
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/v1/threads/' + threadId + '/posts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ content })
+        });
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Ошибка при отправке ответа');
+        }
+    } catch (err) {
+        alert('Ошибка: ' + err.message);
+    }
+});
+</script>
+</body>
+</html>

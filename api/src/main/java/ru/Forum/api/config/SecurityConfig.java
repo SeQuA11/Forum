@@ -51,8 +51,9 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/webjars/**").permitAll()
-                        // Статические ресурсы
+                        // Статические ресурсы и шаблоны
                         .requestMatchers("/", "/index.html", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/forum", "/thread/**", "/login", "/register", "/logout").permitAll()
 
                         // GET запросы к категориям и темам - публичные (для анонимных пользователей)
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**", "/api/categories/**").permitAll()

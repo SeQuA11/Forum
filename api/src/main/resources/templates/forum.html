@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Форум</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .thread-list { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .thread-item { padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .thread-item:last-child { border-bottom: none; }
+        .thread-item:hover { background: #f9f9f9; }
+        .thread-title { font-size: 1.1em; color: #333; text-decoration: none; font-weight: 500; }
+        .thread-title:hover { color: #007bff; }
+        .thread-meta { font-size: 0.85em; color: #888; }
+        .category-filter { margin-bottom: 20px; }
+        .category-filter select { padding: 8px 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; }
+        .nav-links { margin-bottom: 20px; }
+        .nav-links a { margin-right: 15px; color: #007bff; text-decoration: none; }
+        .nav-links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Форум</h1>
+        <div class="nav-links">
+            <a href="/">Главная</a>
+            <a th:if="${username != null and username != 'anonymousUser'}" href="/logout">Выйти (<span th:text="${username}">Пользователь</span>)</a>
+            <a th:unless="${username != null and username != 'anonymousUser'}" href="/login">Войти</a>
+            <a th:unless="${username != null and username != 'anonymousUser'}" href="/register">Регистрация</a>
+        </div>
+    </div>
+    
+    <div class="category-filter">
+        <label for="category">Категория:</label>
+        <select id="category" onchange="filterCategory()">
+            <option value="">Все категории</option>
+            <option th:each="cat : ${categories}" 
+                    th:value="${cat.id}" 
+                    th:text="${cat.name}"
+                    th:selected="${selectedCategory != null and selectedCategory == cat.id}">
+            </option>
+        </select>
+    </div>
+    
+    <div class="thread-list">
+        <div th:each="thread : ${threads}" class="thread-item">
+            <div>
+                <a th:href="@{/thread/{id}(id=${thread.id})}" class="thread-title" th:text="${thread.title}">Заголовок темы</a>
+                <div class="thread-meta">
+                    Автор: <span th:text="${thread.authorUsername}">Автор</span> | 
+                    Категория: <span th:text="${thread.categoryName}">Категория</span> |
+                    Просмотров: <span th:text="${thread.viewsCount}">0</span>
+                </div>
+            </div>
+            <div class="thread-meta">
+                <span th:text="${#temporals.format(thread.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(threads)}" style="padding: 20px; text-align: center; color: #888;">
+            Тем не найдено
+        </div>
+    </div>
+</div>
+
+<script>
+function filterCategory() {
+    const categoryId = document.getElementById('category').value;
+    if (categoryId) {
+        window.location.href = '/forum?categoryId=' + categoryId;
+    } else {
+        window.location.href = '/forum';
+    }
+}
+</script>
+</body>
+</html>

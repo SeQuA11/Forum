@@ -1,6 +1,7 @@
 package ru.Forum.api.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -66,7 +67,26 @@ public class WebController {
     // Страница темы
     @GetMapping("/thread/{id}")
     public String threadPage(@PathVariable Long id, Model model) {
-        // Здесь логика загрузки темы и постов
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        
+        // Загружаем тему
+        ThreadResponseDTO thread = threadService.getThreadById(id);
+        
+        // Загружаем посты темы
+        Page<PostResponseDTO> posts = postService.getPostsByThread(id, 0, 50);
+        
+        // Определяем роль
+        boolean isAdminOrModerator = auth != null && auth.getAuthorities().stream()
+                .anyMatch(r -> r.getAuthority().equals("ROLE_ADMIN") ||
+                        r.getAuthority().equals("ROLE_MODERATOR"));
+        
+        model.addAttribute("thread", thread);
+        model.addAttribute("posts", posts.getContent());
+        model.addAttribute("username", username);
+        model.addAttribute("role", auth != null ? auth.getAuthorities() : null);
+        model.addAttribute("isAdminOrModerator", isAdminOrModerator);
+        
         return "thread";
     }
 }
