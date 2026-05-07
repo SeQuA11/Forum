@@ -20,13 +20,13 @@
 .welcome-label {
     -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-text-fill: white;
+    -fx-text-fill: #333333;
 }
 
 .role-label {
     -fx-font-size: 14px;
-    -fx-text-fill: white;
-    -fx-background-color: rgba(255,255,255,0.2);
+    -fx-text-fill: #333333;
+    -fx-background-color: rgba(102, 126, 234, 0.2);
     -fx-padding: 5 10;
     -fx-background-radius: 5;
 }
@@ -121,10 +121,10 @@
     -fx-font-size: 12px;
 }
 
-/* Верхняя панель - градиент как на сайте */
+/* Верхняя панель - светлая с градиентом */
 .top-bar {
-    -fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 2);
+    -fx-background-color: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
 }
 
 /* Боковая панель */
@@ -143,12 +143,12 @@
 }
 
 .table-view .column-header-background {
-    -fx-background-color: linear-gradient(to bottom, #667eea, #5a6fd6);
+    -fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef);
     -fx-background-radius: 10 10 0 0;
 }
 
 .table-view .column-header .label {
-    -fx-text-fill: white;
+    -fx-text-fill: #333;
     -fx-font-weight: bold;
     -fx-padding: 12;
 }

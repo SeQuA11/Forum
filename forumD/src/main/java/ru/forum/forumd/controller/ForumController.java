@@ -27,12 +27,6 @@ public class ForumController {
     private Label welcomeLabel;
 
     @FXML
-    private Button deleteCategoryButton;
-
-    @FXML
-    private Button deleteThreadButton;
-
-    @FXML
     private Label roleLabel;
 
     @FXML
@@ -75,9 +69,6 @@ public class ForumController {
     private VBox createThreadPane;
 
     @FXML
-    private VBox adminPanel;
-
-    @FXML
     private Label statusLabel;
 
     @FXML
@@ -86,8 +77,6 @@ public class ForumController {
     private ObservableList<CategoryDTO> categories = FXCollections.observableArrayList();
     private ObservableList<ThreadDTO> threads = FXCollections.observableArrayList();
     private CategoryDTO selectedCategory = null;
-
-    @FXML private Button createCategoryButton;
 
     @FXML
     public void initialize() {
@@ -141,37 +130,6 @@ public class ForumController {
         if (HelloApplication.currentUsername != null) {
             welcomeLabel.setText("Добро пожаловать, " + HelloApplication.currentUsername + "!");
             roleLabel.setText("Роль: " + HelloApplication.currentUserRole);
-
-            // Проверяем права
-            boolean isModOrAdmin = "ROLE_MODERATOR".equals(HelloApplication.currentUserRole) ||
-                    "ROLE_ADMIN".equals(HelloApplication.currentUserRole);
-
-            System.out.println("Проверка прав: isModOrAdmin = " + isModOrAdmin);
-
-            // Скрываем кнопки управления категориями для обычных пользователей
-            if (createCategoryButton != null) {
-                createCategoryButton.setVisible(isModOrAdmin);
-                createCategoryButton.setManaged(isModOrAdmin);
-            }
-            if (deleteCategoryButton != null) {
-                deleteCategoryButton.setVisible(isModOrAdmin);
-                deleteCategoryButton.setManaged(isModOrAdmin);
-            }
-
-            // ПОКАЗЫВАЕМ кнопку удаления тем для модераторов/админов
-            if (deleteThreadButton != null) {
-                deleteThreadButton.setVisible(isModOrAdmin);
-                deleteThreadButton.setManaged(isModOrAdmin);
-                System.out.println("Кнопка удаления тем: visible = " + isModOrAdmin);
-            }
-
-            // Показываем админ-панель
-            if (adminPanel != null) {
-                adminPanel.setVisible(isModOrAdmin);
-                adminPanel.setManaged(isModOrAdmin);
-            }
-
-
         }
 
         // Обработчик выбора категории
@@ -368,169 +326,6 @@ public class ForumController {
             alert.setHeaderText(null);
             alert.setContentText("Не удалось выйти: " + e.getMessage());
             alert.showAndWait();
-        }
-    }
-
-    // ========== УДАЛЕНИЕ ==========
-
-    @FXML
-    private void onDeleteThreadClick() {
-        ThreadDTO selectedThread = threadsTableView.getSelectionModel().getSelectedItem();
-
-        if (selectedThread == null) {
-            showError("Выберите тему для удаления!");
-            return;
-        }
-
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Подтверждение удаления");
-        confirmAlert.setHeaderText("Удаление темы");
-        confirmAlert.setContentText("Вы уверены, что хотите удалить тему \"" + selectedThread.getTitle() + "\"?");
-
-        var result = confirmAlert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                ApiService.deleteThread(selectedThread.getId());
-                loadThreads();
-
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Успешно");
-                alert.setHeaderText(null);
-                alert.setContentText("Тема удалена!");
-                alert.showAndWait();
-
-            } catch (Exception e) {
-                showError("Ошибка удаления темы: " + e.getMessage());
-            }
-        }
-    }
-
-    @FXML
-    private void onDeleteCategoryClick() {
-        CategoryDTO selectedCategory = categoryListView.getSelectionModel().getSelectedItem();
-
-        if (selectedCategory == null) {
-            showError("Выберите категорию для удаления!");
-            return;
-        }
-
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Подтверждение удаления");
-        confirmAlert.setHeaderText("Удаление категории");
-        confirmAlert.setContentText("Вы уверены, что хотите удалить категорию \"" + selectedCategory.getName() + "\"?");
-
-        var result = confirmAlert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                ApiService.deleteCategory(selectedCategory.getId());
-                loadCategories();
-
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Успешно");
-                alert.setHeaderText(null);
-                alert.setContentText("Категория удалена!");
-                alert.showAndWait();
-
-            } catch (Exception e) {
-                showError("Ошибка удаления категории: " + e.getMessage());
-            }
-        }
-    }
-
-    // ========== СОЗДАНИЕ КАТЕГОРИИ ==========
-
-    @FXML
-    private void onCreateCategoryClick() {
-        Dialog<CategoryDTO> dialog = new Dialog<>();
-        dialog.setTitle("Создание категории");
-        dialog.setHeaderText("Введите данные новой категории");
-
-        ButtonType createButtonType = new ButtonType("Создать", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
-
-        TextField nameField = new TextField();
-        nameField.setPromptText("Название");
-        TextField descriptionField = new TextField();
-        descriptionField.setPromptText("Описание");
-        TextField slugField = new TextField();
-        slugField.setPromptText("URL (slug)");
-
-        grid.add(new Label("Название:"), 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(new Label("Описание:"), 0, 1);
-        grid.add(descriptionField, 1, 1);
-        grid.add(new Label("URL (slug):"), 0, 2);
-        grid.add(slugField, 1, 2);
-
-        dialog.getDialogPane().setContent(grid);
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == createButtonType) {
-                CategoryDTO dto = new CategoryDTO();
-                dto.setName(nameField.getText());
-                dto.setDescription(descriptionField.getText());
-                dto.setSlug(slugField.getText());
-                dto.setSortOrder(0);
-                dto.setIsActive(true);
-                return dto;
-            }
-            return null;
-        });
-
-        var result = dialog.showAndWait();
-        result.ifPresent(dto -> {
-            try {
-                ApiService.createCategory(dto.getName(), dto.getDescription(),
-                        dto.getSlug(), dto.getSortOrder(), dto.getIsActive());
-                loadCategories();
-            } catch (Exception e) {
-                showError("Ошибка создания категории: " + e.getMessage());
-            }
-        });
-    }
-
-    // ========== МОДЕРАЦИЯ ТЕМ ==========
-
-    @FXML
-    private void onPinThreadClick() {
-        changeThreadStatus("PINNED");
-    }
-
-    @FXML
-    private void onCloseThreadClick() {
-        changeThreadStatus("CLOSED");
-    }
-
-    @FXML
-    private void onHideThreadClick() {
-        changeThreadStatus("HIDDEN");
-    }
-
-    private void changeThreadStatus(String status) {
-        ThreadDTO selectedThread = threadsTableView.getSelectionModel().getSelectedItem();
-
-        if (selectedThread == null) {
-            showError("Выберите тему!");
-            return;
-        }
-
-        try {
-            ApiService.updateThreadStatus(selectedThread.getId(), status);
-            loadThreads();
-
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Успешно");
-            alert.setHeaderText(null);
-            alert.setContentText("Статус темы изменён на " + status);
-            alert.showAndWait();
-
-        } catch (Exception e) {
-            showError("Ошибка изменения статуса: " + e.getMessage());
         }
     }
 
