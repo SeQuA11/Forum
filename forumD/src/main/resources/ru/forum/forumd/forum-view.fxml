@@ -94,6 +94,8 @@
                     <TableColumn fx:id="authorColumn" text="Автор" prefWidth="120.0"/>
                     <TableColumn fx:id="statusColumn" text="Статус" prefWidth="100.0"/>
                     <TableColumn fx:id="viewsColumn" text="Просмотры" prefWidth="80.0"/>
+                    <TableColumn fx:id="pinColumn" text="" prefWidth="50.0"/>
+                    <TableColumn fx:id="actionsColumn" text="Действия" prefWidth="80.0"/>
                 </columns>
             </TableView>
 
