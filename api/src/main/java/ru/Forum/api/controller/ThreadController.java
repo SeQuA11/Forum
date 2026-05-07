@@ -23,9 +23,6 @@ public class ThreadController {
 
     private final ThreadService threadService;
 
-    public ThreadController(ThreadService threadService) {
-        this.threadService = threadService;
-    }
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить тему по ID")
@@ -36,19 +33,21 @@ public class ThreadController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @Operation(summary = "Создать новую тему")
     @ApiResponse(responseCode = "201", description = "Тема создана")
     @ApiResponse(responseCode = "400", description = "Ошибка валидации")
     @ApiResponse(responseCode = "403", description = "Нет прав доступа")
     public ResponseEntity<ThreadResponseDTO> createThread(@Valid @RequestBody ThreadCreateDTO dto) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            throw new RuntimeException("Требуется аутентификация для создания темы");
+        }
+        String username = authentication.getName();
         ThreadResponseDTO thread = threadService.create(dto, username);
         return ResponseEntity.status(201).body(thread);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @Operation(summary = "Обновить тему (автор или модератор)")
     @ApiResponse(responseCode = "200", description = "Тема обновлена")
     @ApiResponse(responseCode = "400", description = "Ошибка валидации")
@@ -57,7 +56,11 @@ public class ThreadController {
     public ResponseEntity<ThreadResponseDTO> updateThread(
             @PathVariable Long id,
             @Valid @RequestBody ThreadCreateDTO dto) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            throw new RuntimeException("Требуется аутентификация для обновления темы");
+        }
+        String username = authentication.getName();
         ThreadResponseDTO updated = threadService.update(id, dto, username);
         return ResponseEntity.ok(updated);
     }
@@ -85,36 +88,50 @@ public class ThreadController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @Operation(summary = "Получить список тем (с учётом прав)")
     @ApiResponse(responseCode = "200", description = "Список тем")
     public ResponseEntity<Page<ThreadResponseDTO>> getAllThreads(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = null;
+        try {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                username = auth.getName();
+            }
+        } catch (Exception e) {
+            // Анонимный пользователь
+        }
         return ResponseEntity.ok(threadService.getActiveThreads(page, size, username));
     }
 
     @GetMapping("/category/{categoryId}")
-    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @Operation(summary = "Получить темы по категории (с учётом прав)")
     @ApiResponse(responseCode = "200", description = "Список тем категории")
     public ResponseEntity<Page<ThreadResponseDTO>> getThreadsByCategory(
             @PathVariable Long categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = null;
+        try {
+            username = SecurityContextHolder.getContext().getAuthentication().getName();
+        } catch (Exception e) {
+            // Анонимный пользователь
+        }
         return ResponseEntity.ok(threadService.getThreadsByCategory(categoryId, page, size, username));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'MODERATOR', 'ADMIN')")
     @Operation(summary = "Удалить тему")
     @ApiResponse(responseCode = "204", description = "Тема удалена")
     @ApiResponse(responseCode = "403", description = "Нет прав")
     @ApiResponse(responseCode = "404", description = "Тема не найдена")
     public ResponseEntity<Void> deleteThread(@PathVariable Long id) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            throw new RuntimeException("Требуется аутентификация для удаления темы");
+        }
+        String username = authentication.getName();
         threadService.delete(id, username);
         return ResponseEntity.noContent().build();
     }

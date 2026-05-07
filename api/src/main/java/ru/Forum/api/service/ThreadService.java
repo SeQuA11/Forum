@@ -27,11 +27,6 @@ public class ThreadService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
-    public ThreadService(ThreadRepository threadRepository, CategoryRepository categoryRepository, UserRepository userRepository) {
-        this.threadRepository = threadRepository;
-        this.categoryRepository = categoryRepository;
-        this.userRepository = userRepository;
-    }
 
     @Transactional(readOnly = true)
     public Page<ThreadResponseDTO> getActiveThreads(int page, int size) {
@@ -117,12 +112,18 @@ public class ThreadService {
 
     @Transactional(readOnly = true)
     public Page<ThreadResponseDTO> getActiveThreads(int page, int size, String username) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        // Если пользователь не аутентифицирован, показываем только ACTIVE темы
+        if (username == null || username.isEmpty() || "anonymousUser".equals(username)) {
+            Page<Thread> threads = threadRepository.findByStatus(ThreadStatus.ACTIVE, pageable);
+            return threads.map(this::convertToDTO);
+        }
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
-        // Админы видят всё, модераторы не видят CLOSED, обычные пользователи видят только ACTIVE
+        // Админы видят всё, модераторы не видят HIDDEN, обычные пользователи видят только ACTIVE
         Page<Thread> threads;
         if (user.getRole() == Role.ADMIN) {
             threads = threadRepository.findAll(pageable);
@@ -137,10 +138,16 @@ public class ThreadService {
 
     @Transactional(readOnly = true)
     public Page<ThreadResponseDTO> getThreadsByCategory(Long categoryId, int page, int size, String username) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        // Если пользователь не аутентифицирован, показываем только ACTIVE темы
+        if (username == null || username.isEmpty() || "anonymousUser".equals(username)) {
+            Page<Thread> threads = threadRepository.findByCategoryIdAndStatus(categoryId, ThreadStatus.ACTIVE, pageable);
+            return threads.map(this::convertToDTO);
+        }
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         Page<Thread> threads;
         if (user.getRole() == Role.ADMIN) {
