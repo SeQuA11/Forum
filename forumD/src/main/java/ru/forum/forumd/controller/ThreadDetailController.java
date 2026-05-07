@@ -50,6 +50,9 @@ public class ThreadDetailController {
     @FXML
     private ComboBox<String> statusComboBox;
 
+    @FXML
+    private Button togglePinButton;
+
     private Long currentThreadId;
     private ThreadDTO currentThread;
     private ObservableList<PostDTO> posts = FXCollections.observableArrayList();
@@ -77,13 +80,29 @@ public class ThreadDetailController {
 
         // Показываем панель модерации только для модераторов и админов
         String role = HelloApplication.currentUserRole;
-        if ("ROLE_MODERATOR".equals(role) || "ROLE_ADMIN".equals(role)) {
+        boolean isModOrAdmin = "ROLE_MODERATOR".equals(role) || "ROLE_ADMIN".equals(role);
+        
+        if (isModOrAdmin) {
             moderationPanel.setVisible(true);
             moderationPanel.setManaged(true);
             statusComboBox.setValue(thread.getStatus());
         } else {
             moderationPanel.setVisible(false);
             moderationPanel.setManaged(false);
+        }
+
+        // Кнопка "Закрепить для себя" доступна всем авторизованным пользователям
+        if (togglePinButton != null) {
+            boolean isLoggedIn = HelloApplication.currentUsername != null;
+            togglePinButton.setVisible(isLoggedIn);
+            togglePinButton.setManaged(isLoggedIn);
+            
+            // Обновляем текст кнопки в зависимости от состояния
+            if (thread.getIsPinnedByCurrentUser() != null && thread.getIsPinnedByCurrentUser()) {
+                togglePinButton.setText("🔖 Открепить от себя");
+            } else {
+                togglePinButton.setText("🔖 Закрепить для себя");
+            }
         }
 
         loadPosts();
@@ -164,6 +183,37 @@ public class ThreadDetailController {
 
         } catch (Exception e) {
             showError("Ошибка изменения статуса: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onTogglePinClick() {
+        try {
+            if (currentThread.getIsPinnedByCurrentUser() != null && currentThread.getIsPinnedByCurrentUser()) {
+                // Открепить
+                ApiService.unpinThread(currentThreadId);
+                currentThread.setIsPinnedByCurrentUser(false);
+                togglePinButton.setText("🔖 Закрепить для себя");
+                
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Успешно");
+                alert.setHeaderText(null);
+                alert.setContentText("Тема откреплена");
+                alert.showAndWait();
+            } else {
+                // Закрепить
+                ApiService.pinThread(currentThreadId);
+                currentThread.setIsPinnedByCurrentUser(true);
+                togglePinButton.setText("🔖 Открепить от себя");
+                
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Успешно");
+                alert.setHeaderText(null);
+                alert.setContentText("Тема закреплена");
+                alert.showAndWait();
+            }
+        } catch (Exception e) {
+            showError("Ошибка: " + e.getMessage());
         }
     }
 

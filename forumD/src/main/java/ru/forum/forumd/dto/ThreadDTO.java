@@ -1,6 +1,7 @@
 package ru.forum.forumd.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
 public class ThreadDTO {
     private Long id;
@@ -18,6 +19,12 @@ public class ThreadDTO {
 
     @JsonProperty("updatedAt")
     private String updatedAt;
+
+    @JsonProperty("isPinnedByCurrentUser")
+    private Boolean isPinnedByCurrentUser;
+
+    @JsonProperty("pinnedByUserIds")
+    private List<Long> pinnedByUserIds;
 
     // Геттеры и сеттеры
     public Long getId() { return id; }
@@ -52,4 +59,10 @@ public class ThreadDTO {
 
     public String getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+
+    public Boolean getIsPinnedByCurrentUser() { return isPinnedByCurrentUser; }
+    public void setIsPinnedByCurrentUser(Boolean isPinnedByCurrentUser) { this.isPinnedByCurrentUser = isPinnedByCurrentUser; }
+
+    public List<Long> getPinnedByUserIds() { return pinnedByUserIds; }
+    public void setPinnedByUserIds(List<Long> pinnedByUserIds) { this.pinnedByUserIds = pinnedByUserIds; }
 }

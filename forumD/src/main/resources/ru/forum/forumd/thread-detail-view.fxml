@@ -41,6 +41,10 @@
                     <ComboBox fx:id="statusComboBox"/>
                     <Button text="Применить" onAction="#onChangeStatusClick" styleClass="primary-button"/>
                 </HBox>
+                <!-- Кнопка "Закрепить для себя" - доступна всем авторизованным -->
+                <HBox spacing="10.0">
+                    <Button fx:id="togglePinButton" text="🔖 Закрепить для себя" onAction="#onTogglePinClick" styleClass="secondary-button"/>
+                </HBox>
             </VBox>
         </VBox>
     </top>

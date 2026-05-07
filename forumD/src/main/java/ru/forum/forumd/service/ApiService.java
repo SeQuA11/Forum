@@ -201,7 +201,7 @@ public class ApiService {
         }
     }
 
-    // ========== MODERATION ==========
+    // ========== MODERATION & PIN ===========
 
     public static ThreadDTO updateThreadStatus(Long threadId, String status) throws Exception {
         HttpRequest httpRequest = HttpRequest.newBuilder()
@@ -216,6 +216,60 @@ public class ApiService {
             return objectMapper.readValue(response.body(), ThreadDTO.class);
         } else {
             throw new Exception("Ошибка изменения статуса: " + response.body());
+        }
+    }
+
+    // Закрепить тему для текущего пользователя
+    public static ThreadDTO pinThread(Long threadId) throws Exception {
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(HelloApplication.API_BASE_URL + "/threads/" + threadId + "/pin"))
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .header("Authorization", "Bearer " + HelloApplication.jwtToken)
+                .build();
+
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            return objectMapper.readValue(response.body(), ThreadDTO.class);
+        } else {
+            throw new Exception("Ошибка закрепления темы: " + response.body());
+        }
+    }
+
+    // Открепить тему для текущего пользователя
+    public static void unpinThread(Long threadId) throws Exception {
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(HelloApplication.API_BASE_URL + "/threads/" + threadId + "/pin"))
+                .DELETE()
+                .header("Authorization", "Bearer " + HelloApplication.jwtToken)
+                .build();
+
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new Exception("Ошибка открепления темы: " + response.body());
+        }
+    }
+
+    // Получить закрепленные темы текущего пользователя
+    public static List<ThreadDTO> getPinnedThreads() throws Exception {
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(HelloApplication.API_BASE_URL + "/threads/pinned"))
+                .header("Authorization", "Bearer " + HelloApplication.jwtToken)
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            objectMapper.configure(
+                    com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                    false
+            );
+            return objectMapper.readValue(response.body(),
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, ThreadDTO.class));
+        } else {
+            throw new Exception("Ошибка получения закрепленных тем: " + response.body());
         }
     }
 

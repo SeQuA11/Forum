@@ -81,7 +81,8 @@
             <!-- Панель модерации (видна только модераторам/админам) -->
             <HBox fx:id="moderationPanel" spacing="10.0" visible="false" managed="false" alignment="CENTER_RIGHT">
                 <Label text="Модерация выбранной темы:" styleClass="small-label"/>
-                <Button text="📌 Закрепить" onAction="#onPinThreadClick" styleClass="small-button"/>
+                <Button text="📌 Закрепить (глобально)" onAction="#onPinThreadClick" styleClass="small-button"/>
+                <Button text="🔖 Закрепить для себя" onAction="#onTogglePinClick" styleClass="small-button"/>
                 <Button text="🔒 Закрыть" onAction="#onCloseThreadClick" styleClass="small-button"/>
                 <Button text="👁️ Скрыть" onAction="#onHideThreadClick" styleClass="small-button"/>
             </HBox>

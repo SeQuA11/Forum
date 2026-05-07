@@ -410,6 +410,39 @@ public class ForumController {
     }
 
     @FXML
+    private void onTogglePinClick() {
+        ThreadDTO selectedThread = threadsTableView.getSelectionModel().getSelectedItem();
+
+        if (selectedThread == null) {
+            showError("Выберите тему!");
+            return;
+        }
+
+        try {
+            if (selectedThread.getIsPinnedByCurrentUser() != null && selectedThread.getIsPinnedByCurrentUser()) {
+                // Открепить
+                ApiService.unpinThread(selectedThread.getId());
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Успешно");
+                alert.setHeaderText(null);
+                alert.setContentText("Тема откреплена");
+                alert.showAndWait();
+            } else {
+                // Закрепить
+                ApiService.pinThread(selectedThread.getId());
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Успешно");
+                alert.setHeaderText(null);
+                alert.setContentText("Тема закреплена");
+                alert.showAndWait();
+            }
+            loadThreads();
+        } catch (Exception e) {
+            showError("Ошибка: " + e.getMessage());
+        }
+    }
+
+    @FXML
     private void onCloseThreadClick() {
         changeThreadStatus("CLOSED");
     }
