@@ -14,6 +14,7 @@ public class ThreadResponseDTO {
     private Integer viewsCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private boolean pinnedByCurrentUser;
 
     // Геттеры и сеттеры
     public Long getId() {
@@ -102,5 +103,13 @@ public class ThreadResponseDTO {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isPinnedByCurrentUser() {
+        return pinnedByCurrentUser;
+    }
+
+    public void setPinnedByCurrentUser(boolean pinnedByCurrentUser) {
+        this.pinnedByCurrentUser = pinnedByCurrentUser;
     }
 }

@@ -144,8 +144,10 @@ const ForumAPI = {
         });
     },
 
-    async viewThread(id) {
-        return await this.request(`/threads/${id}/view`);
+    async togglePin(id) {
+        return await this.request(`/threads/${id}/pin`, {
+            method: 'POST'
+        });
     },
 
     // ========== Сообщения ==========

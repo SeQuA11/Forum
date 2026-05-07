@@ -29,7 +29,30 @@ public class ThreadController {
     @ApiResponse(responseCode = "200", description = "Данные темы")
     @ApiResponse(responseCode = "404", description = "Тема не найдена")
     public ResponseEntity<ThreadResponseDTO> getThread(@PathVariable Long id) {
-        return ResponseEntity.ok(threadService.getThreadById(id));
+        String username = null;
+        try {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                username = auth.getName();
+            }
+        } catch (Exception e) {
+            // Анонимный пользователь
+        }
+        return ResponseEntity.ok(threadService.getThreadByIdWithPinnedStatus(id, username));
+    }
+
+    @PostMapping("/{id}/pin")
+    @Operation(summary = "Закрепить/открепить тему для текущего пользователя")
+    @ApiResponse(responseCode = "200", description = "Статус закрепления изменен")
+    @ApiResponse(responseCode = "404", description = "Тема не найдена")
+    public ResponseEntity<Void> togglePin(@PathVariable Long id) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            throw new RuntimeException("Требуется аутентификация");
+        }
+        String username = authentication.getName();
+        threadService.togglePin(id, username);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping
