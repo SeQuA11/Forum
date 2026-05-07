@@ -8,8 +8,9 @@
 *.so
 *.a
 *.out
-build/
 dist/
+build/
+target/
 
 # Dependencies
 venv/
@@ -18,7 +19,7 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 .gradle/
-target/
+node_modules/
 
 # Logs and temp files
 *.log

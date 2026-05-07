@@ -54,12 +54,14 @@
             <!-- Таблица тем -->
             <TableView fx:id="threadsTableView" VBox.vgrow="ALWAYS" onMouseClicked="#onThreadDoubleClick">
                 <columns>
-                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="450.0"/>
-                    <TableColumn fx:id="authorColumn" text="Автор" prefWidth="120.0"/>
-                    <TableColumn fx:id="statusColumn" text="Статус" prefWidth="100.0"/>
-                    <TableColumn fx:id="viewsColumn" text="Просмотры" prefWidth="80.0"/>
-                    <TableColumn fx:id="pinColumn" text="" prefWidth="50.0"/>
-                    <TableColumn fx:id="actionsColumn" text="Действия" prefWidth="80.0"/>
+                    <!-- Фиксированные узкие колонки -->
+                    <TableColumn fx:id="pinColumn" text="" prefWidth="40.0" maxWidth="40.0" minWidth="40.0" resizable="false" sortable="false"/>
+                    <!-- Название занимает всё оставшееся место -->
+                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="-1.0"/>
+                    <TableColumn fx:id="authorColumn" text="Автор" prefWidth="100.0" maxWidth="100.0" minWidth="100.0" resizable="false" sortable="false"/>
+                    <TableColumn fx:id="statusColumn" text="Статус" prefWidth="90.0" maxWidth="90.0" minWidth="90.0" resizable="false" sortable="false"/>
+                    <TableColumn fx:id="viewsColumn" text="👁" prefWidth="50.0" maxWidth="50.0" minWidth="50.0" resizable="false" sortable="false"/>
+                    <TableColumn fx:id="actionsColumn" text="Действия" prefWidth="110.0" maxWidth="110.0" minWidth="110.0" resizable="false" sortable="false"/>
                 </columns>
             </TableView>
 

@@ -158,14 +158,14 @@ public class ForumController {
                     
                     if (thread.isPinned()) {
                         // Закрепленные темы - желтоватый фон и жирный текст
-                        setStyle("-fx-background-color: #fff3cd; -fx-font-weight: bold;");
+                        setStyle("-fx-background-color: #feebc8; -fx-font-weight: bold;");
                         getStyleClass().add("pinned-row");
                     } else if ("CLOSED".equals(thread.getStatus())) {
                         // Закрытые темы - светло-красный фон
-                        setStyle("-fx-background-color: #ffeaea;");
+                        setStyle("-fx-background-color: #fed7d7;");
                     } else if ("HIDDEN".equals(thread.getStatus())) {
                         // Скрытые темы - серый фон
-                        setStyle("-fx-background-color: #f0f0f0;");
+                        setStyle("-fx-background-color: #e2e8f0;");
                     } else {
                         // Обычные темы - без фона (чередование через CSS)
                         setStyle("");
