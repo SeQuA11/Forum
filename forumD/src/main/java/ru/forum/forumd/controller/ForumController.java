@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import ru.forum.forumd.HelloApplication;
@@ -19,8 +20,6 @@ import ru.forum.forumd.dto.ThreadDTO;
 import ru.forum.forumd.service.ApiService;
 
 import java.util.List;
-
-import static javax.swing.SwingUtilities.getRoot;
 
 public class ForumController {
 
@@ -56,6 +55,9 @@ public class ForumController {
 
     @FXML
     private TableColumn<ThreadDTO, Integer> viewsColumn;
+
+    @FXML
+    private TableColumn<ThreadDTO, Void> pinColumn;
 
     @FXML
     private TableColumn<ThreadDTO, Void> actionsColumn;
@@ -95,6 +97,43 @@ public class ForumController {
         authorColumn.setCellValueFactory(new PropertyValueFactory<>("authorUsername"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
         viewsColumn.setCellValueFactory(new PropertyValueFactory<>("viewsCount"));
+
+        // Настройка колонки закрепления (иконка)
+        pinColumn.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    ThreadDTO thread = getTableView().getItems().get(getIndex());
+                    Label pinLabel = new Label("📌");
+                    pinLabel.setStyle("-fx-font-size: 16px;");
+                    setGraphic(pinLabel);
+                }
+            }
+        });
+
+        // Настройка колонки действий (кнопка удаления)
+        actionsColumn.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    ThreadDTO thread = getTableView().getItems().get(getIndex());
+                    Button deleteBtn = new Button("❌");
+                    deleteBtn.getStyleClass().add("danger-button");
+                    deleteBtn.setTooltip(new Tooltip("Удалить тему"));
+                    deleteBtn.setOnAction(e -> deleteThreadById(thread.getId()));
+                    setGraphic(deleteBtn);
+                }
+            }
+        });
+
+        // Контекстное меню для изменения статуса (правый клик)
+        threadsTableView.setContextMenu(createStatusContextMenu());
 
         loadCategories();
         loadThreads();
@@ -142,6 +181,59 @@ public class ForumController {
                 loadThreadsByCategory(newVal.getId());
             }
         });
+    }
+
+    // Создание контекстного меню для изменения статуса темы
+    private ContextMenu createStatusContextMenu() {
+        ContextMenu contextMenu = new ContextMenu();
+        
+        MenuItem activeItem = new MenuItem("ACTIVE (Активна)");
+        activeItem.setOnAction(e -> changeSelectedThreadStatus("ACTIVE"));
+        
+        MenuItem pinnedItem = new MenuItem("PINNED (Закреплена)");
+        pinnedItem.setOnAction(e -> changeSelectedThreadStatus("PINNED"));
+        
+        MenuItem closedItem = new MenuItem("CLOSED (Закрыта)");
+        closedItem.setOnAction(e -> changeSelectedThreadStatus("CLOSED"));
+        
+        MenuItem hiddenItem = new MenuItem("HIDDEN (Скрыта)");
+        hiddenItem.setOnAction(e -> changeSelectedThreadStatus("HIDDEN"));
+        
+        contextMenu.getItems().addAll(activeItem, pinnedItem, closedItem, hiddenItem);
+        return contextMenu;
+    }
+
+    private void changeSelectedThreadStatus(String status) {
+        ThreadDTO selectedThread = threadsTableView.getSelectionModel().getSelectedItem();
+        if (selectedThread == null) {
+            showError("Выберите тему!");
+            return;
+        }
+        try {
+            ApiService.updateThreadStatus(selectedThread.getId(), status);
+            loadThreads();
+            showSuccess("Статус темы изменён на " + status);
+        } catch (Exception e) {
+            showError("Ошибка изменения статуса: " + e.getMessage());
+        }
+    }
+
+    private void deleteThreadById(Long threadId) {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Подтверждение удаления");
+        confirmAlert.setHeaderText("Удаление темы");
+        confirmAlert.setContentText("Вы уверены, что хотите удалить эту тему?");
+
+        var result = confirmAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                ApiService.deleteThread(threadId);
+                loadThreads();
+                showSuccess("Тема удалена!");
+            } catch (Exception e) {
+                showError("Ошибка удаления темы: " + e.getMessage());
+            }
+        }
     }
 
     private void loadCategories() {
@@ -477,6 +569,14 @@ public class ForumController {
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Ошибка");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showSuccess(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Успешно");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
