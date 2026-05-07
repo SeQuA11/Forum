@@ -87,7 +87,7 @@
             </HBox>
 
             <!-- Таблица тем -->
-            <TableView fx:id="threadsTableView" VBox.vgrow="ALWAYS" onMouseClicked="#onThreadDoubleClick">
+            <TableView fx:id="threadsTableView" VBox.vgrow="ALWAYS" onMouseClicked="#onThreadClick">
                 <columns>
                     <TableColumn fx:id="idColumn" text="ID" prefWidth="50.0"/>
                     <TableColumn fx:id="titleColumn" text="Название" prefWidth="350.0"/>

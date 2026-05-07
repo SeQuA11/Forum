@@ -8,7 +8,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -19,8 +18,6 @@ import ru.forum.forumd.dto.ThreadDTO;
 import ru.forum.forumd.service.ApiService;
 
 import java.util.List;
-
-import static javax.swing.SwingUtilities.getRoot;
 
 public class ForumController {
 
@@ -445,9 +442,7 @@ public class ForumController {
     // ========== ОТКРЫТИЕ ТЕМЫ ==========
 
     @FXML
-    private void onThreadDoubleClick(MouseEvent event) {
-        if (event.getClickCount() != 2) return;
-
+    private void onThreadClick() {
         ThreadDTO selectedThread = threadsTableView.getSelectionModel().getSelectedItem();
         if (selectedThread == null) return;
 
