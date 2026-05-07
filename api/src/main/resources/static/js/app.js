@@ -556,8 +556,8 @@ function openStatusModal(thread) {
 // ========== Открытие деталей темы ==========
 async function openThreadDetail(threadId) {
     try {
-        // Загружаем детали темы
-        const thread = await ForumAPI.getThreadById(threadId);
+        // Увеличиваем счетчик просмотров и загружаем детали темы
+        const thread = await ForumAPI.viewThread(threadId);
         currentThread = thread;
         
         // Заполняем заголовок и метаданные
