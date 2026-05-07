@@ -553,6 +553,69 @@ function openStatusModal(thread) {
     document.getElementById('statusModal').style.display = 'block';
 }
 
+// ========== Открытие деталей темы ==========
+async function openThreadDetail(threadId) {
+    try {
+        // Загружаем детали темы
+        const thread = await ForumAPI.getThreadById(threadId);
+        currentThread = thread;
+        
+        // Заполняем заголовок и метаданные
+        document.getElementById('viewThreadTitle').textContent = thread.title;
+        document.getElementById('viewThreadAuthor').textContent = `Автор: ${thread.authorUsername || 'Неизвестно'}`;
+        document.getElementById('viewThreadStatus').textContent = thread.status || 'ACTIVE';
+        document.getElementById('viewThreadDate').textContent = formatDate(thread.createdAt);
+        
+        // Заполняем контент темы (первый пост/описание)
+        const contentDiv = document.getElementById('viewThreadContent');
+        if (thread.content) {
+            contentDiv.innerHTML = `<div class="post-content">${escapeHtml(thread.content)}</div>`;
+        } else {
+            contentDiv.innerHTML = '<div class="post-content">Описание отсутствует</div>';
+        }
+        
+        // Показываем панель модерации для ADMIN/MODERATOR
+        updateThreadModerationPanel();
+        
+        // Показываем секцию ответов только для авторизованных пользователей
+        const replySection = document.getElementById('replySection');
+        if (AppState.currentUser) {
+            replySection.style.display = 'block';
+        } else {
+            replySection.style.display = 'none';
+        }
+        
+        // Загружаем посты
+        const postsData = await ForumAPI.getPosts(threadId);
+        const posts = postsData.content || postsData;
+        
+        const postsList = document.getElementById('postsList');
+        postsList.innerHTML = '';
+        
+        if (!posts || posts.length === 0) {
+            postsList.innerHTML = '<div class="no-data">Ответов пока нет</div>';
+        } else {
+            posts.forEach(post => {
+                const postDiv = document.createElement('div');
+                postDiv.className = 'post';
+                postDiv.innerHTML = `
+                    <div class="post-author">${escapeHtml(post.authorUsername)}</div>
+                    <div class="post-date">${formatDate(post.createdAt)}</div>
+                    <div class="post-content">${escapeHtml(post.content)}</div>
+                `;
+                postsList.appendChild(postDiv);
+            });
+        }
+        
+        // Открываем модальное окно
+        document.getElementById('viewThreadModal').style.display = 'block';
+        
+    } catch (error) {
+        console.error('Ошибка открытия темы:', error);
+        showError('Ошибка загрузки темы: ' + error.message);
+    }
+}
+
 // ========== Обновление панели модерации в модальном окне ==========
 function updateThreadModerationPanel() {
     const moderationPanel = document.getElementById('threadModerationPanel');
