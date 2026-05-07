@@ -20,12 +20,12 @@
 .welcome-label {
     -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-text-fill: #f0f0f0;
+    -fx-text-fill: #ffffff;
 }
 
 .role-label {
     -fx-font-size: 14px;
-    -fx-text-fill: #f0f0f0;
+    -fx-text-fill: #ffffff;
     -fx-background-color: rgba(255,255,255,0.2);
     -fx-padding: 5 10;
     -fx-background-radius: 5;
@@ -181,7 +181,7 @@
 
 /* Чередование цветов строк */
 .table-row-cell:odd {
-    -fx-background-color: #f5f5f5;
+    -fx-background-color: #fafafa;
 }
 
 .table-row-cell:even {
@@ -190,7 +190,7 @@
 
 /* Закрепленные темы - выделенный фон */
 .table-row-cell:pinned {
-    -fx-background-color: #fff8e1;
+    -fx-background-color: #fff3cd;
     -fx-font-weight: bold;
 }
 
@@ -426,7 +426,7 @@
 
 .badge-pinned {
     -fx-background-color: #ffc107;
-    -fx-text-fill: #333;
+    -fx-text-fill: #000000;
     -fx-padding: 3 8;
     -fx-background-radius: 3;
     -fx-font-size: 11px;
