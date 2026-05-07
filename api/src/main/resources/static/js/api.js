@@ -117,6 +117,10 @@ const ForumAPI = {
         return await this.request(`/threads/${id}`);
     },
 
+    async viewThread(id) {
+        return await this.request(`/threads/${id}/view`);
+    },
+
     async getThreadsByCategory(categoryId, page = 0, size = 100) {
         return await this.request(`/threads/category/${categoryId}?page=${page}&size=${size}`);
     },
@@ -140,8 +144,10 @@ const ForumAPI = {
         });
     },
 
-    async viewThread(id) {
-        return await this.request(`/threads/${id}/view`);
+    async togglePin(id) {
+        return await this.request(`/threads/${id}/pin`, {
+            method: 'POST'
+        });
     },
 
     // ========== Сообщения ==========

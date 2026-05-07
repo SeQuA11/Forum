@@ -15,8 +15,9 @@
                 <Insets bottom="10.0" left="20.0" right="20.0" top="10.0"/>
             </padding>
 
-            <Label fx:id="welcomeLabel" styleClass="welcome-label"/>
+            <Label text="Форум с модерацией" styleClass="title-label"/>
             <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="welcomeLabel" styleClass="welcome-label"/>
             <Label fx:id="roleLabel" styleClass="role-label"/>
             <Button text="Выйти" onAction="#onLogoutClick" styleClass="logout-button"/>
         </HBox>
@@ -29,33 +30,9 @@
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
             </padding>
 
-            <HBox alignment="CENTER_LEFT" spacing="5.0">
-                <Label text="Категории" styleClass="section-label"/>
-                <Region HBox.hgrow="ALWAYS"/>
-
-                <!-- Кнопка создания категории -->
-                <Button fx:id="createCategoryButton" text="➕ Категория" onAction="#onCreateCategoryClick"
-                        styleClass="small-button" maxWidth="150">
-                    <tooltip><Tooltip text="Создать категорию"/></tooltip>
-                </Button>
-
-                <!-- Кнопка удаления категории (красная, как у тем) -->
-                <Button fx:id="deleteCategoryButton" text="❌ Удалить категорию" onAction="#onDeleteCategoryClick"
-                        styleClass="danger-button" maxWidth="180">
-                    <tooltip><Tooltip text="Удалить категорию"/></tooltip>
-                </Button>
-            </HBox>
-
+            <Label text="Все категории" styleClass="section-label"/>
+            <Button text="Показать все темы" onAction="#onAllCategoriesClick" styleClass="primary-button" maxWidth="Infinity"/>
             <ListView fx:id="categoryListView" VBox.vgrow="ALWAYS"/>
-
-            <!-- Панель управления для модераторов/админов -->
-            <VBox fx:id="adminPanel" spacing="5.0" visible="false" managed="false" styleClass="admin-panel">
-                <Separator/>
-                <Label text="Панель управления" styleClass="admin-label"/>
-                <Button text="📊 Статистика" maxWidth="Infinity" styleClass="admin-button"/>
-                <Button text="👥 Пользователи" maxWidth="Infinity" styleClass="admin-button"/>
-                <Button text="⚙️ Настройки" maxWidth="Infinity" styleClass="admin-button"/>
-            </VBox>
         </VBox>
     </left>
 
@@ -72,28 +49,19 @@
 
                 <Button text="🔄 Обновить" onAction="#onRefreshClick" styleClass="refresh-button"/>
                 <Button text="➕ Создать тему" onAction="#onCreateThreadClick" styleClass="primary-button"/>
-
-                <!-- КНОПКА УДАЛЕНИЯ ТЕМ (для модераторов и админов) -->
-                <Button fx:id="deleteThreadButton" text="❌ Удалить тему" onAction="#onDeleteThreadClick"
-                        styleClass="danger-button"/>
-            </HBox>
-
-            <!-- Панель модерации (видна только модераторам/админам) -->
-            <HBox fx:id="moderationPanel" spacing="10.0" visible="false" managed="false" alignment="CENTER_RIGHT">
-                <Label text="Модерация выбранной темы:" styleClass="small-label"/>
-                <Button text="📌 Закрепить" onAction="#onPinThreadClick" styleClass="small-button"/>
-                <Button text="🔒 Закрыть" onAction="#onCloseThreadClick" styleClass="small-button"/>
-                <Button text="👁️ Скрыть" onAction="#onHideThreadClick" styleClass="small-button"/>
             </HBox>
 
             <!-- Таблица тем -->
             <TableView fx:id="threadsTableView" VBox.vgrow="ALWAYS" onMouseClicked="#onThreadDoubleClick">
                 <columns>
-                    <TableColumn fx:id="idColumn" text="ID" prefWidth="50.0"/>
-                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="350.0"/>
-                    <TableColumn fx:id="authorColumn" text="Автор" prefWidth="120.0"/>
-                    <TableColumn fx:id="statusColumn" text="Статус" prefWidth="100.0"/>
-                    <TableColumn fx:id="viewsColumn" text="Просмотры" prefWidth="80.0"/>
+                    <!-- Фиксированные узкие колонки -->
+                    <TableColumn fx:id="pinColumn" text="" prefWidth="40.0" maxWidth="40.0" minWidth="40.0" resizable="false" sortable="false"/>
+                    <!-- Название занимает всё оставшееся место -->
+                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="125.0"/>
+                    <TableColumn fx:id="authorColumn" text="Автор" prefWidth="120.0" maxWidth="120.0" minWidth="120.0" resizable="false" sortable="false"/>
+                    <TableColumn fx:id="statusColumn" text="Статус" prefWidth="110.0" maxWidth="110.0" minWidth="110.0" resizable="false" sortable="false"/>
+                    <TableColumn fx:id="viewsColumn" text="👁" prefWidth="60.0" maxWidth="60.0" minWidth="60.0" resizable="false" sortable="false"/>
+                    <TableColumn fx:id="actionsColumn" text="Действия" prefWidth="130.0" maxWidth="130.0" minWidth="130.0" resizable="false" sortable="false"/>
                 </columns>
             </TableView>
 

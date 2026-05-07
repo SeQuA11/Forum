@@ -182,15 +182,15 @@ function renderThreads(threads) {
     tbody.innerHTML = '';
 
     if (!threads || threads.length === 0) {
-        const colspan = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role) ? 7 : 6;
+        const colspan = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role) ? 9 : 8;
         tbody.innerHTML = `<tr><td colspan="${colspan}" class="no-data">Темы не найдены</td></tr>`;
         return;
     }
 
-    // Сортируем темы: закрепленные (PINNED) сверху
+    // Сортируем темы: сначала закрепленные пользователем, затем обычные
     const sortedThreads = [...threads].sort((a, b) => {
-        const aPinned = a.status === 'PINNED';
-        const bPinned = b.status === 'PINNED';
+        const aPinned = a.pinnedByCurrentUser === true;
+        const bPinned = b.pinnedByCurrentUser === true;
         if (aPinned && !bPinned) return -1;
         if (!aPinned && bPinned) return 1;
         return 0;
@@ -200,26 +200,39 @@ function renderThreads(threads) {
 
     sortedThreads.forEach(thread => {
         const tr = document.createElement('tr');
-        const isPinned = thread.status === 'PINNED';
-        const pinIcon = isPinned ? '<span class="pin-icon" title="Закрепленная тема">📌 </span>' : '';
         
         // Ячейка со статусом только для администраторов и модераторов
         const statusCell = isAdminOrMod ? `<td><span class="badge">${thread.status || 'ACTIVE'}</span></td>` : '';
         
+        // Кнопка закрепления/открепления справа (перед кнопкой удаления)
+        const isPinned = thread.pinnedByCurrentUser === true;
+        const pinButton = AppState.currentUser 
+            ? `<td><button class="btn btn-sm ${isPinned ? 'btn-warning' : 'btn-outline-secondary'} pin-thread-btn" data-thread-id="${thread.id}" title="${isPinned ? 'Открепить' : 'Закрепить'}">${isPinned ? '📍' : '📌'}</button></td>` 
+            : '<td></td>';
+        
         tr.innerHTML = `
-        <td>${pinIcon}${escapeHtml(thread.title)}</td>
+        <td>${escapeHtml(thread.title)}</td>
         <td>${escapeHtml(thread.authorUsername || 'Неизвестно')}</td>
         ${statusCell}
         <td>${thread.viewsCount || 0}</td>
         <td>${formatDate(thread.createdAt)}</td>
+        ${pinButton}
         <td>${isAdminOrMod ? `<button class="btn btn-danger btn-sm delete-thread-btn" data-thread-id="${thread.id}">Удалить</button>` : ''}</td>
         `;
-        // Левый клик - открытие темы (если не кнопка удаления)
+        // Левый клик - открытие темы (если не кнопка удаления или закрепления)
         tr.addEventListener('click', (e) => {
-            if (!e.target.classList.contains('delete-thread-btn')) {
+            if (!e.target.classList.contains('delete-thread-btn') && !e.target.classList.contains('pin-thread-btn')) {
                 openThreadDetail(thread.id);
             }
         });
+        // Обработчик для кнопки закрепления
+        const pinBtn = tr.querySelector('.pin-thread-btn');
+        if (pinBtn) {
+            pinBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleThreadPin(thread.id);
+            });
+        }
         // Правый клик - модальное окно выбора статуса (только для ADMIN/MODERATOR)
         tr.addEventListener('contextmenu', (e) => {
             e.preventDefault();
@@ -553,6 +566,69 @@ function openStatusModal(thread) {
     document.getElementById('statusModal').style.display = 'block';
 }
 
+// ========== Открытие деталей темы ==========
+async function openThreadDetail(threadId) {
+    try {
+        // Увеличиваем счетчик просмотров и загружаем детали темы
+        const thread = await ForumAPI.viewThread(threadId);
+        currentThread = thread;
+        
+        // Заполняем заголовок и метаданные
+        document.getElementById('viewThreadTitle').textContent = thread.title;
+        document.getElementById('viewThreadAuthor').textContent = `Автор: ${thread.authorUsername || 'Неизвестно'}`;
+        document.getElementById('viewThreadStatus').textContent = thread.status || 'ACTIVE';
+        document.getElementById('viewThreadDate').textContent = formatDate(thread.createdAt);
+        
+        // Заполняем контент темы (первый пост/описание)
+        const contentDiv = document.getElementById('viewThreadContent');
+        if (thread.content) {
+            contentDiv.innerHTML = `<div class="post-content">${escapeHtml(thread.content)}</div>`;
+        } else {
+            contentDiv.innerHTML = '<div class="post-content">Описание отсутствует</div>';
+        }
+        
+        // Показываем панель модерации для ADMIN/MODERATOR
+        updateThreadModerationPanel();
+        
+        // Показываем секцию ответов только для авторизованных пользователей
+        const replySection = document.getElementById('replySection');
+        if (AppState.currentUser) {
+            replySection.style.display = 'block';
+        } else {
+            replySection.style.display = 'none';
+        }
+        
+        // Загружаем посты
+        const postsData = await ForumAPI.getPosts(threadId);
+        const posts = postsData.content || postsData;
+        
+        const postsList = document.getElementById('postsList');
+        postsList.innerHTML = '';
+        
+        if (!posts || posts.length === 0) {
+            postsList.innerHTML = '<div class="no-data">Ответов пока нет</div>';
+        } else {
+            posts.forEach(post => {
+                const postDiv = document.createElement('div');
+                postDiv.className = 'post';
+                postDiv.innerHTML = `
+                    <div class="post-author">${escapeHtml(post.authorUsername)}</div>
+                    <div class="post-date">${formatDate(post.createdAt)}</div>
+                    <div class="post-content">${escapeHtml(post.content)}</div>
+                `;
+                postsList.appendChild(postDiv);
+            });
+        }
+        
+        // Открываем модальное окно
+        document.getElementById('viewThreadModal').style.display = 'block';
+        
+    } catch (error) {
+        console.error('Ошибка открытия темы:', error);
+        showError('Ошибка загрузки темы: ' + error.message);
+    }
+}
+
 // ========== Обновление панели модерации в модальном окне ==========
 function updateThreadModerationPanel() {
     const moderationPanel = document.getElementById('threadModerationPanel');
@@ -573,6 +649,28 @@ function logout() {
     AppState.clearAuth();
     initAuth();
     showSuccess('Выход выполнен успешно');
+}
+
+// ========== Закрепление/открепление темы ==========
+async function toggleThreadPin(threadId) {
+    if (!AppState.currentUser) {
+        showError('Сначала войдите в систему');
+        return;
+    }
+    
+    try {
+        await ForumAPI.togglePin(threadId);
+        showSuccess('Статус закрепления изменен');
+        // Перезагружаем список тем
+        if (currentCategory) {
+            loadThreadsByCategory(currentCategory.id);
+        } else {
+            loadThreads();
+        }
+    } catch (error) {
+        console.error('Ошибка изменения статуса закрепления:', error);
+        showError('Ошибка: ' + error.message);
+    }
 }
 
 // ========== Утилиты ==========

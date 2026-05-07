@@ -261,7 +261,7 @@ body {
 
 .modal-large {
     max-width: 800px;
-    max-height: 85vh;
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
     margin: 2% auto;
@@ -317,15 +317,15 @@ body {
 .posts-container {
     flex: 1;
     overflow-y: auto;
-    min-height: 150px;
-    max-height: 350px;
+    min-height: 200px;
+    max-height: 400px;
     margin: 10px 0;
 }
 
 .reply-section {
     flex-shrink: 0;
-    margin-top: 10px;
-    padding-top: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
     border-top: 1px solid #eee;
 }
 
@@ -506,6 +506,12 @@ body {
 .pin-icon {
     font-size: 1.2em;
     margin-right: 5px;
+}
+
+/* Колонка для кнопки закрепления */
+.pin-col {
+    width: 50px;
+    text-align: center;
 }
 
 /* Скрытие элементов для обычных пользователей */
