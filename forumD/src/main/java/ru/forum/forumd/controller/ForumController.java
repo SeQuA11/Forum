@@ -445,11 +445,16 @@ public class ForumController {
     // ========== ОТКРЫТИЕ ТЕМЫ ==========
 
     @FXML
-    private void onThreadDoubleClick(MouseEvent event) {
+    private void onThreadDoubleClick(javafx.scene.input.MouseEvent event) {
         if (event.getClickCount() != 2) return;
 
         ThreadDTO selectedThread = threadsTableView.getSelectionModel().getSelectedItem();
-        if (selectedThread == null) return;
+        if (selectedThread == null) {
+            System.out.println("Тема не выбрана");
+            return;
+        }
+
+        System.out.println("Открытие темы: " + selectedThread.getTitle());
 
         try {
             // 🔧 ИСПРАВЛЕНИЕ: используем HelloApplication.class, так как FXML лежат в его пакете
