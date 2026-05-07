@@ -110,23 +110,26 @@ public class ForumController {
                     ThreadDTO thread = getTableView().getItems().get(getIndex());
                     HBox hbox = new HBox(5);
                     
-                    // Кнопка закрепления/открепления
-                    Button pinBtn = new Button(thread.isPinned() ? "📍" : "📌");
-                    pinBtn.setTooltip(new Tooltip(thread.isPinned() ? "Открепить тему" : "Закрепить тему"));
-                    pinBtn.setStyle("-fx-font-size: 16px; -fx-background-color: transparent;");
-                    pinBtn.setOnAction(e -> togglePinThread(thread));
-                    
-                    // Кнопка удаления (только для ROLE_ADMIN и ROLE_MODERATOR)
+                    // Кнопка закрепления/открепления - видна только модераторам
                     boolean isModerator = "ROLE_ADMIN".equals(HelloApplication.currentUserRole) || 
                                          "ROLE_MODERATOR".equals(HelloApplication.currentUserRole);
+                    
                     if (isModerator) {
+                        Button pinBtn = new Button(thread.isPinned() ? "📍" : "📌");
+                        pinBtn.setTooltip(new Tooltip(thread.isPinned() ? "Открепить тему" : "Закрепить тему"));
+                        pinBtn.setStyle("-fx-font-size: 16px; -fx-background-color: transparent; -fx-cursor: hand;");
+                        pinBtn.setOnAction(e -> togglePinThread(thread));
+                        
+                        // Кнопка удаления (только для ROLE_ADMIN и ROLE_MODERATOR)
                         Button deleteBtn = new Button("❌");
-                        deleteBtn.setStyle("-fx-font-size: 14px; -fx-background-color: transparent;");
+                        deleteBtn.setStyle("-fx-font-size: 14px; -fx-background-color: transparent; -fx-cursor: hand;");
                         deleteBtn.setTooltip(new Tooltip("Удалить тему"));
                         deleteBtn.setOnAction(e -> deleteThreadById(thread.getId()));
                         hbox.getChildren().addAll(pinBtn, deleteBtn);
                     } else {
-                        hbox.getChildren().add(pinBtn);
+                        // Обычные пользователи не видят кнопки управления
+                        Label infoLabel = new Label("");
+                        hbox.getChildren().add(infoLabel);
                     }
                     
                     setGraphic(hbox);
@@ -148,14 +151,23 @@ public class ForumController {
                 super.updateItem(thread, empty);
                 if (empty || thread == null) {
                     setStyle("");
+                    getStyleClass().remove("pinned-row");
                 } else {
+                    // Сначала сбрасываем все классы
+                    getStyleClass().remove("pinned-row");
+                    
                     if (thread.isPinned()) {
-                        setStyle("-fx-background-color: #e8f4fc;");
+                        // Закрепленные темы - желтоватый фон и жирный текст
+                        setStyle("-fx-background-color: #fff3cd; -fx-font-weight: bold;");
+                        getStyleClass().add("pinned-row");
                     } else if ("CLOSED".equals(thread.getStatus())) {
+                        // Закрытые темы - светло-красный фон
                         setStyle("-fx-background-color: #ffeaea;");
                     } else if ("HIDDEN".equals(thread.getStatus())) {
+                        // Скрытые темы - серый фон
                         setStyle("-fx-background-color: #f0f0f0;");
                     } else {
+                        // Обычные темы - без фона (чередование через CSS)
                         setStyle("");
                     }
                 }

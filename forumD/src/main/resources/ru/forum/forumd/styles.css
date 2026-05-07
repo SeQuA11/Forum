@@ -137,33 +137,60 @@
 /* Таблица */
 .table-view {
     -fx-background-color: white;
-    -fx-table-cell-border-color: #ecf0f1;
+    -fx-table-cell-border-color: #bdc3c7;
     -fx-background-radius: 10;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 2);
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
 }
 
 .table-view .column-header-background {
-    -fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+    -fx-background-color: linear-gradient(to bottom, #5a6fd6, #4a5bc7);
     -fx-background-radius: 10 10 0 0;
+    -fx-padding: 5;
 }
 
 .table-view .column-header .label {
     -fx-text-fill: #ffffff;
     -fx-font-weight: bold;
+    -fx-font-size: 14px;
     -fx-padding: 12;
 }
 
+.table-view .column-header {
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 0 1 0 0;
+}
+
 .table-row-cell {
-    -fx-text-fill: #333333;
+    -fx-text-fill: #2c3e50;
+    -fx-font-size: 13px;
+    -fx-border-color: #ecf0f1;
+    -fx-border-width: 0 0 1 0;
 }
 
 .table-row-cell:hover {
-    -fx-background-color: #f5f5f5;
+    -fx-background-color: #e8f4ff;
     -fx-cursor: hand;
 }
 
 .table-row-cell:selected {
-    -fx-background-color: #e8e8ff;
+    -fx-background-color: #d0e8ff;
+}
+
+/* Чередование цветов строк */
+.table-row-cell:odd {
+    -fx-background-color: #fafafa;
+}
+
+.table-row-cell:even {
+    -fx-background-color: #ffffff;
+}
+
+/* Закрепленные темы - выделенный фон */
+.table-row-cell:pinned {
+    -fx-background-color: #fff3cd;
 }
 
 /* Список категорий */
