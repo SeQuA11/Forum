@@ -182,7 +182,7 @@ function renderThreads(threads) {
     tbody.innerHTML = '';
 
     if (!threads || threads.length === 0) {
-        const colspan = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role) ? 8 : 7;
+        const colspan = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role) ? 9 : 8;
         tbody.innerHTML = `<tr><td colspan="${colspan}" class="no-data">Темы не найдены</td></tr>`;
         return;
     }
@@ -203,21 +203,21 @@ function renderThreads(threads) {
         const isPinned = thread.pinnedByCurrentUser === true;
         const pinIcon = isPinned ? '<span class="pin-icon" title="Закрепленная тема">📌 </span>' : '';
         
-        // Кнопка закрепления/открепления слева
+        // Ячейка со статусом только для администраторов и модераторов
+        const statusCell = isAdminOrMod ? `<td><span class="badge">${thread.status || 'ACTIVE'}</span></td>` : '';
+        
+        // Кнопка закрепления/открепления справа (перед кнопкой удаления)
         const pinButton = AppState.currentUser 
             ? `<td><button class="btn btn-sm ${isPinned ? 'btn-warning' : 'btn-outline-secondary'} pin-thread-btn" data-thread-id="${thread.id}" title="${isPinned ? 'Открепить' : 'Закрепить'}">${isPinned ? '📍' : '📌'}</button></td>` 
             : '<td></td>';
         
-        // Ячейка со статусом только для администраторов и модераторов
-        const statusCell = isAdminOrMod ? `<td><span class="badge">${thread.status || 'ACTIVE'}</span></td>` : '';
-        
         tr.innerHTML = `
-        ${pinButton}
         <td>${pinIcon}${escapeHtml(thread.title)}</td>
         <td>${escapeHtml(thread.authorUsername || 'Неизвестно')}</td>
         ${statusCell}
         <td>${thread.viewsCount || 0}</td>
         <td>${formatDate(thread.createdAt)}</td>
+        ${pinButton}
         <td>${isAdminOrMod ? `<button class="btn btn-danger btn-sm delete-thread-btn" data-thread-id="${thread.id}">Удалить</button>` : ''}</td>
         `;
         // Левый клик - открытие темы (если не кнопка удаления или закрепления)

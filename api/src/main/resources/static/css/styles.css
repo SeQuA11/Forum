@@ -508,6 +508,12 @@ body {
     margin-right: 5px;
 }
 
+/* Колонка для кнопки закрепления */
+.pin-col {
+    width: 50px;
+    text-align: center;
+}
+
 /* Скрытие элементов для обычных пользователей */
 .admin-only {
     display: none;
