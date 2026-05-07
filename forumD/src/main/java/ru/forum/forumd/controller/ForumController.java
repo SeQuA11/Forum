@@ -432,10 +432,7 @@ public class ForumController {
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-
-    private void showSuccess(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Успешно");
+        alert.setTitle("Ошибка");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
