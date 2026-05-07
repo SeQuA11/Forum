@@ -9,9 +9,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import ru.forum.forumd.HelloApplication;
 import ru.forum.forumd.controller.ThreadDetailController;
@@ -83,7 +82,7 @@ public class ForumController {
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
         viewsColumn.setCellValueFactory(new PropertyValueFactory<>("viewsCount"));
 
-        // Настройка колонки закрепления (иконка)
+        // Настройка колонки с иконкой закрепления (отображается автоматически)
         pinColumn.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(Void item, boolean empty) {
@@ -99,7 +98,7 @@ public class ForumController {
             }
         });
 
-        // Настройка колонки действий (кнопка удаления)
+        // Настройка колонки действий (кнопка закрепления + удаление только для модераторов)
         actionsColumn.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(Void item, boolean empty) {
@@ -108,17 +107,59 @@ public class ForumController {
                     setGraphic(null);
                 } else {
                     ThreadDTO thread = getTableView().getItems().get(getIndex());
-                    Button deleteBtn = new Button("❌");
-                    deleteBtn.getStyleClass().add("danger-button");
-                    deleteBtn.setTooltip(new Tooltip("Удалить тему"));
-                    deleteBtn.setOnAction(e -> deleteThreadById(thread.getId()));
-                    setGraphic(deleteBtn);
+                    HBox hbox = new HBox(5);
+                    
+                    // Кнопка закрепления/открепления
+                    Button pinBtn = new Button(thread.isPinned() ? "📍" : "📌");
+                    pinBtn.setTooltip(new Tooltip(thread.isPinned() ? "Открепить тему" : "Закрепить тему"));
+                    pinBtn.setStyle("-fx-font-size: 16px; -fx-background-color: transparent;");
+                    pinBtn.setOnAction(e -> togglePinThread(thread));
+                    
+                    // Кнопка удаления (только для ROLE_ADMIN и ROLE_MODERATOR)
+                    boolean isModerator = "ROLE_ADMIN".equals(HelloApplication.currentUserRole) || 
+                                         "ROLE_MODERATOR".equals(HelloApplication.currentUserRole);
+                    if (isModerator) {
+                        Button deleteBtn = new Button("❌");
+                        deleteBtn.setStyle("-fx-font-size: 14px; -fx-background-color: transparent;");
+                        deleteBtn.setTooltip(new Tooltip("Удалить тему"));
+                        deleteBtn.setOnAction(e -> deleteThreadById(thread.getId()));
+                        hbox.getChildren().addAll(pinBtn, deleteBtn);
+                    } else {
+                        hbox.getChildren().add(pinBtn);
+                    }
+                    
+                    setGraphic(hbox);
                 }
             }
         });
 
-        // Контекстное меню для изменения статуса (правый клик)
-        threadsTableView.setContextMenu(createStatusContextMenu());
+        // Контекстное меню для изменения статуса (только для модераторов)
+        boolean isModerator = "ROLE_ADMIN".equals(HelloApplication.currentUserRole) || 
+                             "ROLE_MODERATOR".equals(HelloApplication.currentUserRole);
+        if (isModerator) {
+            threadsTableView.setContextMenu(createStatusContextMenu());
+        }
+
+        // Подсветка строк в зависимости от статуса
+        threadsTableView.setRowFactory(tv -> new TableRow<ThreadDTO>() {
+            @Override
+            protected void updateItem(ThreadDTO thread, boolean empty) {
+                super.updateItem(thread, empty);
+                if (empty || thread == null) {
+                    setStyle("");
+                } else {
+                    if (thread.isPinned()) {
+                        setStyle("-fx-background-color: #e8f4fc;");
+                    } else if ("CLOSED".equals(thread.getStatus())) {
+                        setStyle("-fx-background-color: #ffeaea;");
+                    } else if ("HIDDEN".equals(thread.getStatus())) {
+                        setStyle("-fx-background-color: #f0f0f0;");
+                    } else {
+                        setStyle("");
+                    }
+                }
+            }
+        });
 
         loadCategories();
         loadThreads();
@@ -137,7 +178,19 @@ public class ForumController {
         });
     }
 
-    // Создание контекстного меню для изменения статуса темы и закрепления
+    private void togglePinThread(ThreadDTO thread) {
+        try {
+            boolean isPinned = thread.isPinned();
+            String newStatus = isPinned ? "ACTIVE" : "PINNED";
+            ApiService.updateThreadStatus(thread.getId(), newStatus);
+            loadThreads();
+            showSuccess(isPinned ? "Тема откреплена!" : "Тема закреплена!");
+        } catch (Exception e) {
+            showError("Ошибка изменения закрепления: " + e.getMessage());
+        }
+    }
+
+    // Создание контекстного меню для изменения статуса темы
     private ContextMenu createStatusContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
         
@@ -153,32 +206,8 @@ public class ForumController {
         MenuItem hiddenItem = new MenuItem("HIDDEN (Скрыта)");
         hiddenItem.setOnAction(e -> changeSelectedThreadStatus("HIDDEN"));
         
-        // Разделитель
-        SeparatorMenuItem separator = new SeparatorMenuItem();
-        
-        // Пункт для закрепления/открепления темы
-        MenuItem togglePinItem = new MenuItem("Закрепить тему");
-        togglePinItem.setOnAction(e -> togglePinSelectedThread());
-        
-        contextMenu.getItems().addAll(activeItem, pinnedItem, closedItem, hiddenItem, separator, togglePinItem);
+        contextMenu.getItems().addAll(activeItem, pinnedItem, closedItem, hiddenItem);
         return contextMenu;
-    }
-
-    private void togglePinSelectedThread() {
-        ThreadDTO selectedThread = threadsTableView.getSelectionModel().getSelectedItem();
-        if (selectedThread == null) {
-            showError("Выберите тему!");
-            return;
-        }
-        try {
-            boolean isPinned = selectedThread.isPinned();
-            String newStatus = isPinned ? "ACTIVE" : "PINNED";
-            ApiService.updateThreadStatus(selectedThread.getId(), newStatus);
-            loadThreads();
-            showSuccess(isPinned ? "Тема откреплена!" : "Тема закреплена!");
-        } catch (Exception e) {
-            showError("Ошибка изменения закрепления: " + e.getMessage());
-        }
     }
 
     private void changeSelectedThreadStatus(String status) {

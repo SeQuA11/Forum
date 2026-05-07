@@ -1,38 +1,65 @@
-```
-# Java compilation artifacts
+# Compiled and build artifacts
 *.class
-*.jar
-*.war
-*.ear
-*.jmod
-
-# Build directories
-target/
-build/
-dist/
-
-# IDE files
-.idea/
-*.iml
-*.ipr
-*.iws
-.vscode/
+*.o
+*.obj
+*.out
+*.dll
+*.so
+*.a
+*.pyc
+__pycache__/
 
 # Dependencies
-lib/
-libs/
+node_modules/
+venv/
+.venv/
+target/
+.gradle/
+.mypy_cache/
+.pytest_cache/
+dist/
+build/
 
-# Logs
-*.log
-
-# Temporary files
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
 *.tmp
-*.temp
-*~
-```
 
-Wait, let me reconsider. The only change was deleting `forumD/src/main/java/module-info.java` which is a source file. There are no build artifacts, dependency directories, or temporary files in the change list. According to rule #6, if the change list contains only source files and no build artifacts, dependencies, or temp files, I should output an empty .gitignore.
+# System files
+.DS_Store
+Thumbs.db
+.env
+.env.local
+*.env.*
 
-```
+# Logs and coverage
+*.log
+coverage/
+htmlcov/
+.coverage
 
-```
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
