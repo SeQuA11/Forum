@@ -57,7 +57,7 @@
                     <!-- Фиксированные узкие колонки -->
                     <TableColumn fx:id="pinColumn" text="" prefWidth="40.0" maxWidth="40.0" minWidth="40.0" resizable="false" sortable="false"/>
                     <!-- Название занимает всё оставшееся место -->
-                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="500.0"/>
+                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="250.0"/>
                     <TableColumn fx:id="authorColumn" text="Автор" prefWidth="120.0" maxWidth="120.0" minWidth="120.0" resizable="false" sortable="false"/>
                     <TableColumn fx:id="statusColumn" text="Статус" prefWidth="110.0" maxWidth="110.0" minWidth="110.0" resizable="false" sortable="false"/>
                     <TableColumn fx:id="viewsColumn" text="👁" prefWidth="60.0" maxWidth="60.0" minWidth="60.0" resizable="false" sortable="false"/>
