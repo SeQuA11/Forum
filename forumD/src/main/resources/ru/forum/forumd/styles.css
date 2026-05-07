@@ -152,7 +152,7 @@
 }
 
 .table-view .column-header .label {
-    -fx-text-fill: #ffffff;
+    -fx-text-fill: #e2e8f0;
     -fx-font-weight: bold;
     -fx-font-size: 14px;
     -fx-padding: 12;
