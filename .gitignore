@@ -9,15 +9,18 @@ target/
 
 # Dependencies
 .gradle/
-node_modules/
-venv/
-.venv/
+.mypy_cache/
+.pytest_cache/
 __pycache__/
+coverage/
+htmlcov/
+*.coverage
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
+*.swo
 
 # Environment
 .env

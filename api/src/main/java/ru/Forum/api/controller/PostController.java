@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,11 +15,14 @@ import ru.Forum.api.service.PostService;
 
 @RestController
 @RequestMapping("/api/v1/threads/{threadId}/posts")
-@RequiredArgsConstructor
 @Tag(name = "Сообщения", description = "API для управления сообщениями в темах")
 public class PostController {
 
     private final PostService postService;
+
+    public PostController(PostService postService) {
+        this.postService = postService;
+    }
 
 
     @GetMapping

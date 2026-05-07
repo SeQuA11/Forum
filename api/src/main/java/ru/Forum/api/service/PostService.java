@@ -1,6 +1,5 @@
 package ru.Forum.api.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,12 +18,17 @@ import ru.Forum.api.repository.UserRepository;
 import java.time.LocalDateTime;
 
 @Service
-@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
     private final ThreadRepository threadRepository;
     private final UserRepository userRepository;
+
+    public PostService(PostRepository postRepository, ThreadRepository threadRepository, UserRepository userRepository) {
+        this.postRepository = postRepository;
+        this.threadRepository = threadRepository;
+        this.userRepository = userRepository;
+    }
 
 
     @Transactional(readOnly = true)

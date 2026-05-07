@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,13 +14,18 @@ import ru.Forum.api.dto.ThreadResponseDTO;
 import ru.Forum.api.entity.ThreadStatus;
 import ru.Forum.api.service.ThreadService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/threads")
-@RequiredArgsConstructor
 @Tag(name = "Темы форума", description = "API для управления темами обсуждений")
 public class ThreadController {
 
     private final ThreadService threadService;
+
+    public ThreadController(ThreadService threadService) {
+        this.threadService = threadService;
+    }
 
 
     @GetMapping("/{id}")

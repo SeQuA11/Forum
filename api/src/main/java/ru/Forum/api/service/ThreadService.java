@@ -1,6 +1,5 @@
 package ru.Forum.api.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,13 +20,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class ThreadService {
 
     private final ThreadRepository threadRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final UserPinnedThreadRepository userPinnedThreadRepository;
+
+    public ThreadService(ThreadRepository threadRepository, CategoryRepository categoryRepository, 
+                         UserRepository userRepository, UserPinnedThreadRepository userPinnedThreadRepository) {
+        this.threadRepository = threadRepository;
+        this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
+        this.userPinnedThreadRepository = userPinnedThreadRepository;
+    }
 
 
     @Transactional(readOnly = true)

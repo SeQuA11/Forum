@@ -1,6 +1,5 @@
 package ru.Forum.api.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.Forum.api.dto.CategoryDTO;
@@ -12,11 +11,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final ThreadRepository threadRepository;  // ДОБАВЛЕНО!
+
+    public CategoryService(CategoryRepository categoryRepository, ThreadRepository threadRepository) {
+        this.categoryRepository = categoryRepository;
+        this.threadRepository = threadRepository;
+    }
 
 
     @Transactional(readOnly = true)

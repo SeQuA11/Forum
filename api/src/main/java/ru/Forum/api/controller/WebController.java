@@ -1,6 +1,5 @@
 package ru.Forum.api.controller;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -15,13 +14,20 @@ import ru.Forum.api.service.UserService;
 import java.util.List;
 
 @Controller
-@RequiredArgsConstructor
 public class WebController {
 
     private final CategoryService categoryService;
     private final ThreadService threadService;
     private final PostService postService;
     private final UserService userService;
+
+    public WebController(CategoryService categoryService, ThreadService threadService, 
+                         PostService postService, UserService userService) {
+        this.categoryService = categoryService;
+        this.threadService = threadService;
+        this.postService = postService;
+        this.userService = userService;
+    }
 
 
     // Страница входа
