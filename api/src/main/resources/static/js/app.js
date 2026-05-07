@@ -530,6 +530,36 @@ async function changeThreadStatus(status) {
     }
 }
 
+// ========== Закрепление/открепление темы (для всех пользователей) ==========
+async function togglePinThread(threadId) {
+    if (!AppState.currentUser) {
+        showError('Сначала войдите в систему');
+        return;
+    }
+
+    try {
+        const thread = await ForumAPI.viewThread(threadId);
+        const isPinned = thread.isPinnedByCurrentUser;
+
+        if (isPinned) {
+            await ForumAPI.unpinThread(threadId);
+            showSuccess('Тема откреплена');
+        } else {
+            await ForumAPI.pinThread(threadId);
+            showSuccess('Тема закреплена');
+        }
+
+        // Перезагружаем список тем
+        if (currentCategory) {
+            loadThreadsByCategory(currentCategory.id);
+        } else {
+            loadThreads();
+        }
+    } catch (error) {
+        showError('Ошибка: ' + error.message);
+    }
+}
+
 // ========== Изменение статуса темы по ID (из модального окна статуса) ==========
 async function changeThreadStatusById(threadId, status) {
     try {

@@ -84,7 +84,16 @@ public class ThreadController {
     @ApiResponse(responseCode = "200", description = "Данные темы")
     @ApiResponse(responseCode = "404", description = "Тема не найдена")
     public ResponseEntity<ThreadResponseDTO> viewThread(@PathVariable Long id) {
-        return ResponseEntity.ok(threadService.incrementViews(id));
+        String username = null;
+        try {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                username = auth.getName();
+            }
+        } catch (Exception e) {
+            // Анонимный пользователь
+        }
+        return ResponseEntity.ok(threadService.getThreadById(id, username));
     }
 
     @GetMapping
@@ -134,5 +143,48 @@ public class ThreadController {
         String username = authentication.getName();
         threadService.delete(id, username);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/pin")
+    @Operation(summary = "Закрепить тему для текущего пользователя")
+    @ApiResponse(responseCode = "200", description = "Тема закреплена")
+    @ApiResponse(responseCode = "403", description = "Требуется аутентификация")
+    @ApiResponse(responseCode = "404", description = "Тема не найдена")
+    public ResponseEntity<ThreadResponseDTO> pinThread(@PathVariable Long id) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            throw new RuntimeException("Требуется аутентификация для закрепления темы");
+        }
+        String username = authentication.getName();
+        ThreadResponseDTO result = threadService.pinThread(id, username);
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/{id}/pin")
+    @Operation(summary = "Открепить тему для текущего пользователя")
+    @ApiResponse(responseCode = "204", description = "Тема откреплена")
+    @ApiResponse(responseCode = "403", description = "Требуется аутентификация")
+    public ResponseEntity<Void> unpinThread(@PathVariable Long id) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            throw new RuntimeException("Требуется аутентификация для открепления темы");
+        }
+        String username = authentication.getName();
+        threadService.unpinThread(id, username);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/pinned")
+    @Operation(summary = "Получить закрепленные темы текущего пользователя")
+    @ApiResponse(responseCode = "200", description = "Список закрепленных тем")
+    @ApiResponse(responseCode = "403", description = "Требуется аутентификация")
+    public ResponseEntity<List<ThreadResponseDTO>> getPinnedThreads() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            throw new RuntimeException("Требуется аутентификация");
+        }
+        String username = authentication.getName();
+        List<ThreadResponseDTO> pinnedThreads = threadService.getPinnedThreads(username);
+        return ResponseEntity.ok(pinnedThreads);
     }
 }

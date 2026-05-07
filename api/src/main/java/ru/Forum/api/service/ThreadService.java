@@ -13,6 +13,7 @@ import ru.Forum.api.entity.*;
 import ru.Forum.api.entity.Thread;
 import ru.Forum.api.repository.CategoryRepository;
 import ru.Forum.api.repository.ThreadRepository;
+import ru.Forum.api.repository.UserPinnedThreadRepository;
 import ru.Forum.api.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -26,7 +27,59 @@ public class ThreadService {
     private final ThreadRepository threadRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final UserPinnedThreadRepository userPinnedThreadRepository;
 
+
+    @Transactional(readOnly = true)
+    public Page<ThreadResponseDTO> getActiveThreads(int page, int size, String username) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        // Если пользователь не аутентифицирован, показываем только ACTIVE темы
+        if (username == null || username.isEmpty() || "anonymousUser".equals(username)) {
+            Page<Thread> threads = threadRepository.findByStatus(ThreadStatus.ACTIVE, pageable);
+            return threads.map(this::convertToDTO);
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
+
+        // Админы видят всё, модераторы не видят HIDDEN, обычные пользователи видят только ACTIVE
+        Page<Thread> threads;
+        if (user.getRole() == Role.ADMIN) {
+            threads = threadRepository.findAll(pageable);
+        } else if (user.getRole() == Role.MODERATOR) {
+            threads = threadRepository.findByStatusNot(ThreadStatus.HIDDEN, pageable);
+        } else {
+            threads = threadRepository.findByStatus(ThreadStatus.ACTIVE, pageable);
+        }
+
+        return threads.map(thread -> convertToDTOWithPinInfo(thread, user.getId()));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ThreadResponseDTO> getThreadsByCategory(Long categoryId, int page, int size, String username) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        // Если пользователь не аутентифицирован, показываем только ACTIVE темы
+        if (username == null || username.isEmpty() || "anonymousUser".equals(username)) {
+            Page<Thread> threads = threadRepository.findByCategoryIdAndStatus(categoryId, ThreadStatus.ACTIVE, pageable);
+            return threads.map(this::convertToDTO);
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
+
+        Page<Thread> threads;
+        if (user.getRole() == Role.ADMIN) {
+            threads = threadRepository.findByCategoryId(categoryId, pageable);
+        } else if (user.getRole() == Role.MODERATOR) {
+            threads = threadRepository.findByCategoryIdAndStatusNot(categoryId, ThreadStatus.HIDDEN, pageable);
+        } else {
+            threads = threadRepository.findByCategoryIdAndStatus(categoryId, ThreadStatus.ACTIVE, pageable);
+        }
+
+        return threads.map(thread -> convertToDTOWithPinInfo(thread, user.getId()));
+    }
 
     @Transactional(readOnly = true)
     public Page<ThreadResponseDTO> getActiveThreads(int page, int size) {
@@ -46,6 +99,19 @@ public class ThreadService {
     public ThreadResponseDTO getThreadById(Long id) {
         Thread thread = threadRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Тема не найдена: " + id));
+        return convertToDTO(thread);
+    }
+
+    @Transactional(readOnly = true)
+    public ThreadResponseDTO getThreadById(Long id, String username) {
+        Thread thread = threadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Тема не найдена: " + id));
+        
+        if (username != null && !username.isEmpty() && !"anonymousUser".equals(username)) {
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
+            return convertToDTOWithPinInfo(thread, user.getId());
+        }
         return convertToDTO(thread);
     }
 
@@ -110,57 +176,6 @@ public class ThreadService {
         return convertToDTO(threadRepository.save(thread));
     }
 
-    @Transactional(readOnly = true)
-    public Page<ThreadResponseDTO> getActiveThreads(int page, int size, String username) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
-        // Если пользователь не аутентифицирован, показываем только ACTIVE темы
-        if (username == null || username.isEmpty() || "anonymousUser".equals(username)) {
-            Page<Thread> threads = threadRepository.findByStatus(ThreadStatus.ACTIVE, pageable);
-            return threads.map(this::convertToDTO);
-        }
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
-
-        // Админы видят всё, модераторы не видят HIDDEN, обычные пользователи видят только ACTIVE
-        Page<Thread> threads;
-        if (user.getRole() == Role.ADMIN) {
-            threads = threadRepository.findAll(pageable);
-        } else if (user.getRole() == Role.MODERATOR) {
-            threads = threadRepository.findByStatusNot(ThreadStatus.HIDDEN, pageable);
-        } else {
-            threads = threadRepository.findByStatus(ThreadStatus.ACTIVE, pageable);
-        }
-
-        return threads.map(this::convertToDTO);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<ThreadResponseDTO> getThreadsByCategory(Long categoryId, int page, int size, String username) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
-        // Если пользователь не аутентифицирован, показываем только ACTIVE темы
-        if (username == null || username.isEmpty() || "anonymousUser".equals(username)) {
-            Page<Thread> threads = threadRepository.findByCategoryIdAndStatus(categoryId, ThreadStatus.ACTIVE, pageable);
-            return threads.map(this::convertToDTO);
-        }
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
-
-        Page<Thread> threads;
-        if (user.getRole() == Role.ADMIN) {
-            threads = threadRepository.findByCategoryId(categoryId, pageable);
-        } else if (user.getRole() == Role.MODERATOR) {
-            threads = threadRepository.findByCategoryIdAndStatusNot(categoryId, ThreadStatus.HIDDEN, pageable);
-        } else {
-            threads = threadRepository.findByCategoryIdAndStatus(categoryId, ThreadStatus.ACTIVE, pageable);
-        }
-
-        return threads.map(this::convertToDTO);
-    }
-
     // Метод для удаления темы
     @Transactional
     public void delete(Long id, String username) {
@@ -180,6 +195,51 @@ public class ThreadService {
         threadRepository.delete(thread);
     }
 
+    // Закрепить тему для текущего пользователя
+    @Transactional
+    public ThreadResponseDTO pinThread(Long threadId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
+        
+        Thread thread = threadRepository.findById(threadId)
+                .orElseThrow(() -> new RuntimeException("Тема не найдена: " + threadId));
+
+        if (!userPinnedThreadRepository.existsById_UserIdAndId_ThreadId(user.getId(), threadId)) {
+            UserPinnedThread pinned = new UserPinnedThread();
+            UserPinnedThreadId pk = new UserPinnedThreadId(user.getId(), threadId);
+            pinned.setId(pk);
+            pinned.setCreatedAt(LocalDateTime.now());
+            userPinnedThreadRepository.save(pinned);
+        }
+
+        return convertToDTOWithPinInfo(thread, user.getId());
+    }
+
+    // Открепить тему для текущего пользователя
+    @Transactional
+    public void unpinThread(Long threadId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
+        
+        userPinnedThreadRepository.deleteByUserIdAndThreadId(user.getId(), threadId);
+    }
+
+    // Получить закрепленные темы для текущего пользователя
+    @Transactional(readOnly = true)
+    public List<ThreadResponseDTO> getPinnedThreads(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + username));
+        
+        List<UserPinnedThread> pinnedThreads = userPinnedThreadRepository.findById_UserId(user.getId());
+        
+        return pinnedThreads.stream()
+                .map(p -> convertToDTOWithPinInfo(
+                        threadRepository.findById(p.getId().getThreadId())
+                                .orElseThrow(() -> new RuntimeException("Тема не найдена")),
+                        user.getId()))
+                .collect(Collectors.toList());
+    }
+
     private ThreadResponseDTO convertToDTO(Thread thread) {
         ThreadResponseDTO dto = new ThreadResponseDTO();
         dto.setId(thread.getId());
@@ -193,6 +253,35 @@ public class ThreadService {
         dto.setViewsCount(thread.getViewsCount());
         dto.setCreatedAt(thread.getCreatedAt());
         dto.setUpdatedAt(thread.getUpdatedAt());
+        dto.setIsPinnedByCurrentUser(false);
+        dto.setPinnedByUserIds(getPinnedUserIds(thread.getId()));
         return dto;
+    }
+
+    private ThreadResponseDTO convertToDTOWithPinInfo(Thread thread, Long currentUserId) {
+        ThreadResponseDTO dto = new ThreadResponseDTO();
+        dto.setId(thread.getId());
+        dto.setTitle(thread.getTitle());
+        dto.setContent(thread.getContent());
+        dto.setCategoryId(thread.getCategory().getId());
+        dto.setCategoryName(thread.getCategory().getName());
+        dto.setAuthorId(thread.getAuthor().getId());
+        dto.setAuthorUsername(thread.getAuthor().getUsername());
+        dto.setStatus(thread.getStatus().name());
+        dto.setViewsCount(thread.getViewsCount());
+        dto.setCreatedAt(thread.getCreatedAt());
+        dto.setUpdatedAt(thread.getUpdatedAt());
+        
+        List<Long> pinnedUserIds = getPinnedUserIds(thread.getId());
+        dto.setPinnedByUserIds(pinnedUserIds);
+        dto.setIsPinnedByCurrentUser(pinnedUserIds.contains(currentUserId));
+        
+        return dto;
+    }
+
+    private List<Long> getPinnedUserIds(Long threadId) {
+        return userPinnedThreadRepository.findById_ThreadId(threadId).stream()
+                .map(p -> p.getId().getUserId())
+                .collect(Collectors.toList());
     }
 }

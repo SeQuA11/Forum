@@ -1,6 +1,7 @@
 package ru.Forum.api.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ThreadResponseDTO {
     private Long id;
@@ -14,6 +15,8 @@ public class ThreadResponseDTO {
     private Integer viewsCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean isPinnedByCurrentUser;
+    private List<Long> pinnedByUserIds;
 
     // Геттеры и сеттеры
     public Long getId() {
@@ -102,5 +105,21 @@ public class ThreadResponseDTO {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Boolean getIsPinnedByCurrentUser() {
+        return isPinnedByCurrentUser;
+    }
+
+    public void setIsPinnedByCurrentUser(Boolean isPinnedByCurrentUser) {
+        this.isPinnedByCurrentUser = isPinnedByCurrentUser;
+    }
+
+    public List<Long> getPinnedByUserIds() {
+        return pinnedByUserIds;
+    }
+
+    public void setPinnedByUserIds(List<Long> pinnedByUserIds) {
+        this.pinnedByUserIds = pinnedByUserIds;
     }
 }

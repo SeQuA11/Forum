@@ -144,6 +144,24 @@ const ForumAPI = {
         return await this.request(`/threads/${id}/view`);
     },
 
+    // ========== Закрепленные темы ==========
+
+    async pinThread(id) {
+        return await this.request(`/threads/${id}/pin`, {
+            method: 'POST'
+        });
+    },
+
+    async unpinThread(id) {
+        return await this.request(`/threads/${id}/pin`, {
+            method: 'DELETE'
+        });
+    },
+
+    async getPinnedThreads() {
+        return await this.request('/threads/pinned');
+    },
+
     // ========== Сообщения ==========
 
     async getPosts(threadId, page = 0, size = 100) {
