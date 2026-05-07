@@ -23,6 +23,9 @@ public class UserPinnedThread {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "pinned_at", nullable = false)
+    private LocalDateTime pinnedAt = LocalDateTime.now();
+
     // Конструкторы
     public UserPinnedThread() {}
 
@@ -31,6 +34,7 @@ public class UserPinnedThread {
         this.thread = thread;
         this.id = new UserPinnedThreadId(user.getId(), thread.getId());
         this.createdAt = LocalDateTime.now();
+        this.pinnedAt = LocalDateTime.now();
     }
 
     // Геттеры и сеттеры
@@ -64,5 +68,13 @@ public class UserPinnedThread {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getPinnedAt() {
+        return pinnedAt;
+    }
+
+    public void setPinnedAt(LocalDateTime pinnedAt) {
+        this.pinnedAt = pinnedAt;
     }
 }

@@ -200,19 +200,18 @@ function renderThreads(threads) {
 
     sortedThreads.forEach(thread => {
         const tr = document.createElement('tr');
-        const isPinned = thread.pinnedByCurrentUser === true;
-        const pinIcon = isPinned ? '<span class="pin-icon" title="Закрепленная тема">📌 </span>' : '';
         
         // Ячейка со статусом только для администраторов и модераторов
         const statusCell = isAdminOrMod ? `<td><span class="badge">${thread.status || 'ACTIVE'}</span></td>` : '';
         
         // Кнопка закрепления/открепления справа (перед кнопкой удаления)
+        const isPinned = thread.pinnedByCurrentUser === true;
         const pinButton = AppState.currentUser 
             ? `<td><button class="btn btn-sm ${isPinned ? 'btn-warning' : 'btn-outline-secondary'} pin-thread-btn" data-thread-id="${thread.id}" title="${isPinned ? 'Открепить' : 'Закрепить'}">${isPinned ? '📍' : '📌'}</button></td>` 
             : '<td></td>';
         
         tr.innerHTML = `
-        <td>${pinIcon}${escapeHtml(thread.title)}</td>
+        <td>${escapeHtml(thread.title)}</td>
         <td>${escapeHtml(thread.authorUsername || 'Неизвестно')}</td>
         ${statusCell}
         <td>${thread.viewsCount || 0}</td>
