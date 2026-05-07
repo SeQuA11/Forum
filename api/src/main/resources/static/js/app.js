@@ -182,15 +182,15 @@ function renderThreads(threads) {
     tbody.innerHTML = '';
 
     if (!threads || threads.length === 0) {
-        const colspan = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role) ? 7 : 6;
+        const colspan = AppState.currentUser && ['ROLE_ADMIN', 'ROLE_MODERATOR'].includes(AppState.currentUser.role) ? 8 : 7;
         tbody.innerHTML = `<tr><td colspan="${colspan}" class="no-data">Темы не найдены</td></tr>`;
         return;
     }
 
-    // Сортируем темы: закрепленные (PINNED) сверху
+    // Сортируем темы: сначала закрепленные пользователем, затем обычные
     const sortedThreads = [...threads].sort((a, b) => {
-        const aPinned = a.status === 'PINNED';
-        const bPinned = b.status === 'PINNED';
+        const aPinned = a.pinnedByCurrentUser === true;
+        const bPinned = b.pinnedByCurrentUser === true;
         if (aPinned && !bPinned) return -1;
         if (!aPinned && bPinned) return 1;
         return 0;
@@ -200,13 +200,19 @@ function renderThreads(threads) {
 
     sortedThreads.forEach(thread => {
         const tr = document.createElement('tr');
-        const isPinned = thread.status === 'PINNED';
+        const isPinned = thread.pinnedByCurrentUser === true;
         const pinIcon = isPinned ? '<span class="pin-icon" title="Закрепленная тема">📌 </span>' : '';
+        
+        // Кнопка закрепления/открепления слева
+        const pinButton = AppState.currentUser 
+            ? `<td><button class="btn btn-sm ${isPinned ? 'btn-warning' : 'btn-outline-secondary'} pin-thread-btn" data-thread-id="${thread.id}" title="${isPinned ? 'Открепить' : 'Закрепить'}">${isPinned ? '📍' : '📌'}</button></td>` 
+            : '<td></td>';
         
         // Ячейка со статусом только для администраторов и модераторов
         const statusCell = isAdminOrMod ? `<td><span class="badge">${thread.status || 'ACTIVE'}</span></td>` : '';
         
         tr.innerHTML = `
+        ${pinButton}
         <td>${pinIcon}${escapeHtml(thread.title)}</td>
         <td>${escapeHtml(thread.authorUsername || 'Неизвестно')}</td>
         ${statusCell}
@@ -214,12 +220,20 @@ function renderThreads(threads) {
         <td>${formatDate(thread.createdAt)}</td>
         <td>${isAdminOrMod ? `<button class="btn btn-danger btn-sm delete-thread-btn" data-thread-id="${thread.id}">Удалить</button>` : ''}</td>
         `;
-        // Левый клик - открытие темы (если не кнопка удаления)
+        // Левый клик - открытие темы (если не кнопка удаления или закрепления)
         tr.addEventListener('click', (e) => {
-            if (!e.target.classList.contains('delete-thread-btn')) {
+            if (!e.target.classList.contains('delete-thread-btn') && !e.target.classList.contains('pin-thread-btn')) {
                 openThreadDetail(thread.id);
             }
         });
+        // Обработчик для кнопки закрепления
+        const pinBtn = tr.querySelector('.pin-thread-btn');
+        if (pinBtn) {
+            pinBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleThreadPin(thread.id);
+            });
+        }
         // Правый клик - модальное окно выбора статуса (только для ADMIN/MODERATOR)
         tr.addEventListener('contextmenu', (e) => {
             e.preventDefault();
@@ -636,6 +650,28 @@ function logout() {
     AppState.clearAuth();
     initAuth();
     showSuccess('Выход выполнен успешно');
+}
+
+// ========== Закрепление/открепление темы ==========
+async function toggleThreadPin(threadId) {
+    if (!AppState.currentUser) {
+        showError('Сначала войдите в систему');
+        return;
+    }
+    
+    try {
+        await ForumAPI.togglePin(threadId);
+        showSuccess('Статус закрепления изменен');
+        // Перезагружаем список тем
+        if (currentCategory) {
+            loadThreadsByCategory(currentCategory.id);
+        } else {
+            loadThreads();
+        }
+    } catch (error) {
+        console.error('Ошибка изменения статуса закрепления:', error);
+        showError('Ошибка: ' + error.message);
+    }
 }
 
 // ========== Утилиты ==========
