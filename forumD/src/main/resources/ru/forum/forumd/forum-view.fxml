@@ -29,8 +29,7 @@
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
             </padding>
 
-            <Label text="Все категории" styleClass="section-label"/>
-
+            <Button text="Все категории" onAction="#onAllCategoriesClick" styleClass="primary-button" maxWidth="Infinity"/>
             <ListView fx:id="categoryListView" VBox.vgrow="ALWAYS"/>
         </VBox>
     </left>
@@ -53,8 +52,7 @@
             <!-- Таблица тем -->
             <TableView fx:id="threadsTableView" VBox.vgrow="ALWAYS" onMouseClicked="#onThreadDoubleClick">
                 <columns>
-                    <TableColumn fx:id="idColumn" text="ID" prefWidth="50.0"/>
-                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="350.0"/>
+                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="400.0"/>
                     <TableColumn fx:id="authorColumn" text="Автор" prefWidth="120.0"/>
                     <TableColumn fx:id="statusColumn" text="Статус" prefWidth="100.0"/>
                     <TableColumn fx:id="viewsColumn" text="Просмотры" prefWidth="80.0"/>

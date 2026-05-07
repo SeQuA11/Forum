@@ -52,4 +52,8 @@ public class ThreadDTO {
 
     public String getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+
+    public boolean isPinned() { 
+        return "PINNED".equals(status); 
+    }
 }

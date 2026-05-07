@@ -36,9 +36,6 @@ public class ForumController {
     private TableView<ThreadDTO> threadsTableView;
 
     @FXML
-    private TableColumn<ThreadDTO, Long> idColumn;
-
-    @FXML
     private TableColumn<ThreadDTO, String> titleColumn;
 
     @FXML
@@ -81,7 +78,6 @@ public class ForumController {
     @FXML
     public void initialize() {
         // Настройка таблицы
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         authorColumn.setCellValueFactory(new PropertyValueFactory<>("authorUsername"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -96,7 +92,7 @@ public class ForumController {
                     setGraphic(null);
                 } else {
                     ThreadDTO thread = getTableView().getItems().get(getIndex());
-                    Label pinLabel = new Label("📌");
+                    Label pinLabel = new Label(thread.isPinned() ? "📌" : "");
                     pinLabel.setStyle("-fx-font-size: 16px;");
                     setGraphic(pinLabel);
                 }
@@ -141,7 +137,7 @@ public class ForumController {
         });
     }
 
-    // Создание контекстного меню для изменения статуса темы
+    // Создание контекстного меню для изменения статуса темы и закрепления
     private ContextMenu createStatusContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
         
@@ -157,8 +153,32 @@ public class ForumController {
         MenuItem hiddenItem = new MenuItem("HIDDEN (Скрыта)");
         hiddenItem.setOnAction(e -> changeSelectedThreadStatus("HIDDEN"));
         
-        contextMenu.getItems().addAll(activeItem, pinnedItem, closedItem, hiddenItem);
+        // Разделитель
+        SeparatorMenuItem separator = new SeparatorMenuItem();
+        
+        // Пункт для закрепления/открепления темы
+        MenuItem togglePinItem = new MenuItem("Закрепить тему");
+        togglePinItem.setOnAction(e -> togglePinSelectedThread());
+        
+        contextMenu.getItems().addAll(activeItem, pinnedItem, closedItem, hiddenItem, separator, togglePinItem);
         return contextMenu;
+    }
+
+    private void togglePinSelectedThread() {
+        ThreadDTO selectedThread = threadsTableView.getSelectionModel().getSelectedItem();
+        if (selectedThread == null) {
+            showError("Выберите тему!");
+            return;
+        }
+        try {
+            boolean isPinned = selectedThread.isPinned();
+            String newStatus = isPinned ? "ACTIVE" : "PINNED";
+            ApiService.updateThreadStatus(selectedThread.getId(), newStatus);
+            loadThreads();
+            showSuccess(isPinned ? "Тема откреплена!" : "Тема закреплена!");
+        } catch (Exception e) {
+            showError("Ошибка изменения закрепления: " + e.getMessage());
+        }
     }
 
     private void changeSelectedThreadStatus(String status) {
@@ -286,6 +306,13 @@ public class ForumController {
     @FXML
     private void onRefreshClick() {
         loadCategories();
+        loadThreads();
+    }
+
+    @FXML
+    private void onAllCategoriesClick() {
+        selectedCategory = null;
+        categoryListView.getSelectionModel().clearSelection();
         loadThreads();
     }
 
