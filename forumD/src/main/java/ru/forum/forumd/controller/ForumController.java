@@ -117,12 +117,12 @@ public class ForumController {
                     if (isModerator) {
                         Button pinBtn = new Button(thread.isPinned() ? "📍" : "📌");
                         pinBtn.setTooltip(new Tooltip(thread.isPinned() ? "Открепить тему" : "Закрепить тему"));
-                        pinBtn.setStyle("-fx-font-size: 16px; -fx-background-color: transparent; -fx-cursor: hand;");
+                        pinBtn.setStyle("-fx-font-size: 16px; -fx-background-color: #ffc107; -fx-background-radius: 5; -fx-cursor: hand; -fx-padding: 5 8;");
                         pinBtn.setOnAction(e -> togglePinThread(thread));
                         
                         // Кнопка удаления (только для ROLE_ADMIN и ROLE_MODERATOR)
                         Button deleteBtn = new Button("❌");
-                        deleteBtn.setStyle("-fx-font-size: 14px; -fx-background-color: transparent; -fx-cursor: hand;");
+                        deleteBtn.setStyle("-fx-font-size: 14px; -fx-background-color: #dc3545; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand; -fx-padding: 5 8;");
                         deleteBtn.setTooltip(new Tooltip("Удалить тему"));
                         deleteBtn.setOnAction(e -> deleteThreadById(thread.getId()));
                         hbox.getChildren().addAll(pinBtn, deleteBtn);
@@ -432,10 +432,7 @@ public class ForumController {
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-
-    private void showSuccess(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Успешно");
+        alert.setTitle("Ошибка");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();

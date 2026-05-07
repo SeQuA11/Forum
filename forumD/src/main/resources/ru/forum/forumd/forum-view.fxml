@@ -57,11 +57,11 @@
                     <!-- Фиксированные узкие колонки -->
                     <TableColumn fx:id="pinColumn" text="" prefWidth="40.0" maxWidth="40.0" minWidth="40.0" resizable="false" sortable="false"/>
                     <!-- Название занимает всё оставшееся место -->
-                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="-1.0"/>
-                    <TableColumn fx:id="authorColumn" text="Автор" prefWidth="100.0" maxWidth="100.0" minWidth="100.0" resizable="false" sortable="false"/>
-                    <TableColumn fx:id="statusColumn" text="Статус" prefWidth="90.0" maxWidth="90.0" minWidth="90.0" resizable="false" sortable="false"/>
-                    <TableColumn fx:id="viewsColumn" text="👁" prefWidth="50.0" maxWidth="50.0" minWidth="50.0" resizable="false" sortable="false"/>
-                    <TableColumn fx:id="actionsColumn" text="Действия" prefWidth="110.0" maxWidth="110.0" minWidth="110.0" resizable="false" sortable="false"/>
+                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="125.0"/>
+                    <TableColumn fx:id="authorColumn" text="Автор" prefWidth="120.0" maxWidth="120.0" minWidth="120.0" resizable="false" sortable="false"/>
+                    <TableColumn fx:id="statusColumn" text="Статус" prefWidth="110.0" maxWidth="110.0" minWidth="110.0" resizable="false" sortable="false"/>
+                    <TableColumn fx:id="viewsColumn" text="👁" prefWidth="60.0" maxWidth="60.0" minWidth="60.0" resizable="false" sortable="false"/>
+                    <TableColumn fx:id="actionsColumn" text="Действия" prefWidth="130.0" maxWidth="130.0" minWidth="130.0" resizable="false" sortable="false"/>
                 </columns>
             </TableView>
 
