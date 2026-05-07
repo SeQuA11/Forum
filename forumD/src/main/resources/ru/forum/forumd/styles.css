@@ -8,25 +8,25 @@
 .title-label {
     -fx-font-size: 32px;
     -fx-font-weight: bold;
-    -fx-text-fill: white;
+    -fx-text-fill: #333333;
 }
 
 .section-label {
     -fx-font-size: 18px;
     -fx-font-weight: bold;
-    -fx-text-fill: #333333;
+    -fx-text-fill: #667eea;
 }
 
 .welcome-label {
     -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-text-fill: #333333;
+    -fx-text-fill: #ffffff;
 }
 
 .role-label {
     -fx-font-size: 14px;
-    -fx-text-fill: #333333;
-    -fx-background-color: rgba(102, 126, 234, 0.2);
+    -fx-text-fill: #ffffff;
+    -fx-background-color: rgba(255,255,255,0.2);
     -fx-padding: 5 10;
     -fx-background-radius: 5;
 }
@@ -121,10 +121,10 @@
     -fx-font-size: 12px;
 }
 
-/* Верхняя панель - светлая с градиентом */
+/* Верхняя панель - с градиентом как на сайте */
 .top-bar {
-    -fx-background-color: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
+    -fx-background-color: linear-gradient(to right, #667eea, #764ba2);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 2);
 }
 
 /* Боковая панель */
@@ -148,9 +148,13 @@
 }
 
 .table-view .column-header .label {
-    -fx-text-fill: #333;
+    -fx-text-fill: #ffffff;
     -fx-font-weight: bold;
     -fx-padding: 12;
+}
+
+.table-row-cell {
+    -fx-text-fill: #333333;
 }
 
 .table-row-cell:hover {
@@ -172,6 +176,7 @@
 .list-cell {
     -fx-padding: 12;
     -fx-background-color: transparent;
+    -fx-text-fill: #333333;
 }
 
 .list-cell:hover {

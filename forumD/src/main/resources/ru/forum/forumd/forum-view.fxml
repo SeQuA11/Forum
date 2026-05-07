@@ -15,8 +15,9 @@
                 <Insets bottom="10.0" left="20.0" right="20.0" top="10.0"/>
             </padding>
 
-            <Label fx:id="welcomeLabel" styleClass="welcome-label"/>
+            <Label text="Форум с модерацией" styleClass="title-label"/>
             <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="welcomeLabel" styleClass="welcome-label"/>
             <Label fx:id="roleLabel" styleClass="role-label"/>
             <Button text="Выйти" onAction="#onLogoutClick" styleClass="logout-button"/>
         </HBox>
@@ -29,7 +30,8 @@
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
             </padding>
 
-            <Button text="Все категории" onAction="#onAllCategoriesClick" styleClass="primary-button" maxWidth="Infinity"/>
+            <Label text="Все категории" styleClass="section-label"/>
+            <Button text="Показать все темы" onAction="#onAllCategoriesClick" styleClass="primary-button" maxWidth="Infinity"/>
             <ListView fx:id="categoryListView" VBox.vgrow="ALWAYS"/>
         </VBox>
     </left>
@@ -52,7 +54,7 @@
             <!-- Таблица тем -->
             <TableView fx:id="threadsTableView" VBox.vgrow="ALWAYS" onMouseClicked="#onThreadDoubleClick">
                 <columns>
-                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="400.0"/>
+                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="450.0"/>
                     <TableColumn fx:id="authorColumn" text="Автор" prefWidth="120.0"/>
                     <TableColumn fx:id="statusColumn" text="Статус" prefWidth="100.0"/>
                     <TableColumn fx:id="viewsColumn" text="Просмотры" prefWidth="80.0"/>

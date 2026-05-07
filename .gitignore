@@ -1,58 +1,37 @@
 ```
-# Compiled and build artifacts
+# Java/Maven specific
+target/
 *.class
-*.o
-*.obj
-*.out
-*.dll
-*.so
-*.a
-*.exe
+*.jar
+*.war
+*.ear
+.mvn/
 
 # Dependencies
-target/
-.gradle/
+lib/
+libs/
 
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-
-# Editors
-.vscode/
+# IDE
 .idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-.Python
-*.egg-info/
-.eggs/
-.mypy_cache/
-.pytest_cache/
-.tox/
-.coverage
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git/
-.svn/
-.hg/
-.DS_Store
-Thumbs.db
+# Temporary files
+*.tmp
+*.temp
+*~
 ```
