@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>04. JavaDoc API (Форум Иванов)</title>
+</head>
+<body>
+    <h1>ДОКУМЕНТАЦИЯ REST API</h1>
+    <h2>Информационная система «Форум»</h2>
+    <p><strong>Разработчик API:</strong> Иванов</p>
+    <p><strong>Версия спецификации:</strong> 1.0.0</p>
+    <hr>
+
+    <h3>1. ОБЩАЯ ИНФОРМАЦИЯ</h3>
+    <p>Данный документ описывает программный интерфейс приложения (API) для системы «Форум». Взаимодействие с сервером осуществляется посредством HTTP/HTTPS запросов в формате REST.</p>
+    
+    <p><strong>Базовый URL API:</strong></p>
+    <ul>
+        <li>Локальная разработка: <code>http://localhost:8080/api</code></li>
+        <li>Продуктивная среда: <code>https://forum.yourdomain.com/api</code></li>
+    </ul>
+
+    <p><strong>Интерактивная документация (Swagger UI):</strong></p>
+    <p>Для удобного тестирования и изучения методов доступна интерактивная консоль по адресу:</p>
+    <ul>
+        <li><a href="http://localhost:8080/swagger-ui.html" target="_blank">http://localhost:8080/swagger-ui.html</a></li>
+    </ul>
+    
+    <p><strong>Спецификация OpenAPI (JSON):</strong></p>
+    <ul>
+        <li><a href="http://localhost:8080/v3/api-docs" target="_blank">http://localhost:8080/v3/api-docs</a></li>
+    </ul>
+
+    <h3>2. АУТЕНТИФИКАЦИЯ И АВТОРИЗАЦИЯ</h3>
+    <p>Большинство эндпоинтов API требуют аутентификации пользователя. Для доступа к защищенным ресурсам необходимо использовать JWT (JSON Web Token).</p>
+    
+    <p><strong>Получение токена:</strong></p>
+    <p>Выполните POST-запрос на эндпоинт <code>/auth/login</code>, передав логин и пароль. В ответе сервер вернет токен, который необходимо использовать в заголовке всех последующих запросов.</p>
+    
+    <p><strong>Формат заголовка:</strong></p>
+    <pre>Authorization: Bearer &lt;ваш_jwt_токен&gt;</pre>
+
+    <h3>3. ОПИСАНИЕ ЭНДПОИНТОВ</h3>
+
+    <h4>3.1. Контроллер аутентификации (Auth Controller)</h4>
+    
+    <p><strong>POST /api/auth/register</strong></p>
+    <ul>
+        <li><strong>Описание:</strong> Регистрация нового пользователя.</li>
+        <li><strong>Тело запроса (JSON):</strong>
+            <pre>{
+  "username": "string",
+  "password": "string",
+  "email": "user@example.com",
+  "role": "USER" 
+}</pre>
+        </li>
+        <li><strong>Ответы:</strong>
+            <ul>
+                <li><code>201 Created</code>: Пользователь успешно создан.</li>
+                <li><code>400 Bad Request</code>: Ошибка валидации данных (например, слабый пароль или занятый email).</li>
+            </ul>
+        </li>
+    </ul>
+
+    <p><strong>POST /api/auth/login</strong></p>
+    <ul>
+        <li><strong>Описание:</strong> Вход в систему.</li>
+        <li><strong>Тело запроса (JSON):</strong>
+            <pre>{
+  "username": "string",
+  "password": "string"
+}</pre>
+        </li>
+        <li><strong>Ответы:</strong>
+            <ul>
+                <li><code>200 OK</code>: Возвращает объект с токеном доступа.</li>
+                <li><code>401 Unauthorized</code>: Неверный логин или пароль.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h4>3.2. Контроллер тем (Topic Controller)</h4>
+
+    <p><strong>GET /api/topics</strong></p>
+    <ul>
+        <li><strong>Описание:</strong> Получение списка всех тем с пагинацией.</li>
+        <li><strong>Параметры запроса (Query Params):</strong>
+            <ul>
+                <li><code>page</code> (int): Номер страницы (начиная с 0).</li>
+                <li><code>size</code> (int): Количество элементов на странице (по умолчанию 10).</li>
+                <li><code>sort</code> (string): Сортировка (например, <code>createdAt,desc</code>).</li>
+            </ul>
+        </li>
+        <li><strong>Ответы:</strong>
+            <ul>
+                <li><code>200 OK</code>: Список объектов Topic.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <p><strong>GET /api/topics/{id}</strong></p>
+    <ul>
+        <li><strong>Описание:</strong> Получение полной информации о теме по ID.</li>
+        <li><strong>Параметры пути:</strong> <code>id</code> (Long) — идентификатор темы.</li>
+        <li><strong>Ответы:</strong>
+            <ul>
+                <li><code>200 OK</code>: Объект Topic.</li>
+                <li><code>404 Not Found</code>: Тема не найдена.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <p><strong>POST /api/topics</strong></p>
+    <ul>
+        <li><strong>Описание:</strong> Создание новой темы. Требуется авторизация.</li>
+        <li><strong>Тело запроса (JSON):</strong>
+            <pre>{
+  "title": "Заголовок темы",
+  "content": "Текст первого сообщения",
+  "categoryId": 1
+}</pre>
+        </li>
+        <li><strong>Ответы:</strong>
+            <ul>
+                <li><code>201 Created</code>: Тема создана.</li>
+                <li><code>401 Unauthorized</code>: Пользователь не авторизован.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <p><strong>PUT /api/topics/{id}</strong></p>
+    <ul>
+        <li><strong>Описание:</strong> Обновление темы (заголовка или статуса). Доступно автору или модератору.</li>
+        <li><strong>Ответы:</strong>
+            <ul>
+                <li><code>200 OK</code>: Тема обновлена.</li>
+                <li><code>403 Forbidden</code>: Недостаточно прав.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <p><strong>DELETE /api/topics/{id}</strong></p>
+    <ul>
+        <li><strong>Описание:</strong> Удаление темы. Доступно модератору или администратору.</li>
+        <li><strong>Ответы:</strong>
+            <ul>
+                <li><code>204 No Content</code>: Тема удалена.</li>
+                <li><code>403 Forbidden</code>: Недостаточно прав.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h4>3.3. Контроллер сообщений (Post Controller)</h4>
+
+    <p><strong>GET /api/topics/{topicId}/posts</strong></p>
+    <ul>
+        <li><strong>Описание:</strong> Получение списка сообщений внутри конкретной темы.</li>
+        <li><strong>Параметры пути:</strong> <code>topicId</code> — ID темы.</li>
+        <li><strong>Ответы:</strong>
+            <ul>
+                <li><code>200 OK</code>: Список объектов Post.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <p><strong>POST /api/topics/{topicId}/posts</strong></p>
+    <ul>
+        <li><strong>Описание:</strong> Добавление нового ответа в тему. Требуется авторизация.</li>
+        <li><strong>Тело запроса (JSON):</strong>
+            <pre>{
+  "content": "Текст сообщения"
+}</pre>
+        </li>
+        <li><strong>Ответы:</strong>
+            <ul>
+                <li><code>201 Created</code>: Сообщение добавлено.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <p><strong>DELETE /api/posts/{id}</strong></p>
+    <ul>
+        <li><strong>Описание:</strong> Удаление конкретного сообщения.</li>
+        <li><strong>Ответы:</strong>
+            <ul>
+                <li><code>204 No Content</code>: Сообщение удалено.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h4>3.4. Контроллер пользователей (User Controller)</h4>
+
+    <p><strong>GET /api/users/{id}</strong></p>
+    <ul>
+        <li><strong>Описание:</strong> Получение публичного профиля пользователя.</li>
+        <li><strong>Ответы:</strong>
+            <ul>
+                <li><code>200 OK</code>: Объект UserDTO (без чувствительных данных).</li>
+            </ul>
+        </li>
+    </ul>
+
+    <p><strong>PUT /api/users/profile</strong></p>
+    <ul>
+        <li><strong>Описание:</strong> Обновление собственного профиля (имя, аватар, подпись). Требуется авторизация.</li>
+        <li><strong>Ответы:</strong>
+            <ul>
+                <li><code>200 OK</code>: Профиль обновлен.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>4. МОДЕЛИ ДАННЫХ (DTO)</h3>
+
+    <p><strong>UserDTO</strong></p>
+    <pre>{
+  "id": 1,
+  "username": "ivanov",
+  "email": "ivanov@example.com",
+  "role": "USER",
+  "registeredAt": "2023-10-01T12:00:00Z",
+  "avatarUrl": "/uploads/avatars/1.png"
+}</pre>
+
+    <p><strong>TopicDTO</strong></p>
+    <pre>{
+  "id": 101,
+  "title": "Как установить JDK?",
+  "content": "Всем привет, возникли проблемы...",
+  "author": { "id": 1, "username": "ivanov" },
+  "category": { "id": 1, "name": "Java" },
+  "createdAt": "2023-10-05T14:30:00Z",
+  "viewsCount": 15,
+  "postsCount": 3
+}</pre>
+
+    <p><strong>PostDTO</strong></p>
+    <pre>{
+  "id": 505,
+  "content": "Попробуйте переустановить...",
+  "author": { "id": 2, "username": "petrov" },
+  "createdAt": "2023-10-05T15:00:00Z",
+  "editedAt": null
+}</pre>
+
+    <h3>5. КОДЫ СОСТОЯНИЯ HTTP</h3>
+    <ul>
+        <li><strong>200 OK</strong>: Запрос успешно выполнен.</li>
+        <li><strong>201 Created</strong>: Ресурс успешно создан.</li>
+        <li><strong>204 No Content</strong>: Запрос выполнен успешно, тело ответа пустое (обычно при удалении).</li>
+        <li><strong>400 Bad Request</strong>: Ошибка валидации входных данных.</li>
+        <li><strong>401 Unauthorized</strong>: Отсутствует токен аутентификации или он неверен.</li>
+        <li><strong>403 Forbidden</strong>: Пользователь авторизован, но не имеет прав на выполнение действия.</li>
+        <li><strong>404 Not Found</strong>: Запрашиваемый ресурс не найден.</li>
+        <li><strong>500 Internal Server Error</strong>: Ошибка на стороне сервера.</li>
+    </ul>
+</body>
+</html>

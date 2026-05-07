@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>03. Инструкция администратора по развертыванию (Варнаков)</title>
+</head>
+<body>
+    <h1>ИНСТРУКЦИЯ АДМИНИСТРАТОРА ПО РАЗВЕРТЫВАНИЮ</h1>
+    <h2>Информационная система «Форум»</h2>
+    <p><strong>Автор:</strong> Варнаков</p>
+    <p><strong>Версия документа:</strong> 1.0</p>
+    <hr>
+
+    <h3>1. ВВЕДЕНИЕ</h3>
+    <p>Настоящий документ описывает процедуру установки, настройки и ввода в эксплуатацию информационной системы «Форум». Инструкция предназначена для системных администраторов и специалистов технической поддержки.</p>
+
+    <h3>2. ТРЕБОВАНИЯ К АППАРАТНОМУ И ПРОГРАММНОМУ ОБЕСПЕЧЕНИЮ</h3>
+    <p><strong>2.1. Аппаратные требования (минимальные):</strong></p>
+    <ul>
+        <li>Процессор: 2 ядра (x86_64).</li>
+        <li>Оперативная память: 4 ГБ RAM.</li>
+        <li>Дисковое пространство: 20 ГБ свободного места (SSD рекомендуется).</li>
+        <li>Сетевой интерфейс: 100 Мбит/с.</li>
+    </ul>
+
+    <p><strong>2.2. Программные требования:</strong></p>
+    <ul>
+        <li>Операционная система: Linux (Ubuntu 20.04 LTS / Debian 11+ / CentOS 8+) или Windows Server 2019+.</li>
+        <li>Java Runtime Environment: JDK 17 или выше (OpenJDK рекомендован).</li>
+        <li>СУБД: PostgreSQL версии 13 или выше.</li>
+        <li>Веб-сервер (опционально): Nginx или Apache HTTP Server (для организации обратного прокси и SSL).</li>
+    </ul>
+
+    <h3>3. УСТАНОВКА ЗАВИСИМОСТЕЙ</h3>
+    <p><strong>3.1. Установка Java (на примере Ubuntu/Debian):</strong></p>
+    <pre>
+sudo apt update
+sudo apt install openjdk-17-jdk -y
+java -version  # Проверка версии (должна быть 17+)
+    </pre>
+
+    <p><strong>3.2. Установка PostgreSQL:</strong></p>
+    <pre>
+sudo apt install postgresql postgresql-contrib -y
+sudo systemctl status postgresql  # Проверка статуса службы
+    </pre>
+
+    <h3>4. НАСТРОЙКА БАЗЫ ДАННЫХ</h3>
+    <p>4.1. Переключитесь на пользователя postgres и войдите в консоль СУБД:</p>
+    <pre>
+sudo -u postgres psql
+    </pre>
+
+    <p>4.2. Выполните SQL-команды для создания базы данных и пользователя приложения:</p>
+    <pre>
+CREATE DATABASE forum_db WITH ENCODING 'UTF8';
+CREATE USER forum_user WITH PASSWORD 'complex_password_here';
+GRANT ALL PRIVILEGES ON DATABASE forum_db TO forum_user;
+\c forum_db
+GRANT ALL ON SCHEMA public TO forum_user;
+\q
+    </pre>
+    <p><em>Внимание: Замените 'complex_password_here' на надежный пароль, соответствующий политике безопасности вашей организации.</em></p>
+
+    <h3>5. РАЗВЕРТЫВАНИЕ ПРИЛОЖЕНИЯ</h3>
+    <p>5.1. Создайте директорию для размещения приложения:</p>
+    <pre>
+sudo mkdir -p /opt/forum
+sudo chown $USER:$USER /opt/forum
+    </pre>
+
+    <p>5.2. Скопируйте файл приложения (например, <code>forum-app.jar</code>) в созданную директорию.</p>
+
+    <p>5.3. Создайте файл конфигурации <code>application.properties</code> в той же директории со следующим содержимым:</p>
+    <pre>
+# Порт сервера
+server.port=8080
+
+# Настройки подключения к БД
+spring.datasource.url=jdbc:postgresql://localhost:5432/forum_db
+spring.datasource.username=forum_user
+spring.datasource.password=complex_password_here
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# Настройки JPA/Hibernate
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+# Настройки файлов uploads
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+file.upload-dir=/opt/forum/uploads
+    </pre>
+
+    <p>5.4. Создайте директорию для загружаемых файлов:</p>
+    <pre>
+mkdir -p /opt/forum/uploads
+    </pre>
+
+    <p>5.5. Запуск приложения в ручном режиме (для тестирования):</p>
+    <pre>
+java -jar /opt/forum/forum-app.jar --spring.config.location=file:/opt/forum/application.properties
+    </pre>
+    <p>Убедитесь, что в логах нет ошибок и приложение успешно подключилось к базе данных.</p>
+
+    <h3>6. НАСТРОЙКА АВТОМАТИЧЕСКОГО ЗАПУСКА (SYSTEMD)</h3>
+    <p>Для обеспечения работы приложения в фоновом режиме и автоматического старта при загрузке ОС создайте сервис systemd.</p>
+    
+    <p>6.1. Создайте файл сервиса:</p>
+    <pre>
+sudo nano /etc/systemd/system/forum.service
+    </pre>
+
+    <p>6.2. Добавьте следующее содержимое:</p>
+    <pre>
+[Unit]
+Description=Forum Application Service
+After=syslog.target network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/forum
+ExecStart=/usr/bin/java -jar /opt/forum/forum-app.jar --spring.config.location=file:/opt/forum/application.properties
+SuccessExitStatus=143
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+    </pre>
+
+    <p>6.3. Активируйте и запустите сервис:</p>
+    <pre>
+sudo systemctl daemon-reload
+sudo systemctl enable forum
+sudo systemctl start forum
+sudo systemctl status forum
+    </pre>
+
+    <h3>7. НАСТРОЙКА ВЕБ-СЕРВЕРА (NGINX) И БЕЗОПАСНОСТЬ</h3>
+    <p><strong>7.1. Установка и настройка Nginx (Reverse Proxy):</strong></p>
+    <pre>
+sudo apt install nginx -y
+sudo nano /etc/nginx/sites-available/forum
+    </pre>
+    
+    <p>Конфигурация Nginx:</p>
+    <pre>
+server {
+    listen 80;
+    server_name forum.yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+    </pre>
+
+    <p>Активация конфигурации:</p>
+    <pre>
+sudo ln -s /etc/nginx/sites-available/forum /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+    </pre>
+
+    <p><strong>7.2. Настройка брандмауэра (UFW):</strong></p>
+    <pre>
+sudo ufw allow 'Nginx Full'
+sudo ufw allow 'OpenSSH'
+sudo ufw enable
+    </pre>
+    <p><em>Прямой доступ к порту 8080 следует закрыть, оставив доступ только через Nginx (порты 80/443).</em></p>
+
+    <h3>8. МОНИТОРИНГ И ОБСЛУЖИВАНИЕ</h3>
+    <p><strong>8.1. Просмотр логов приложения:</strong></p>
+    <p>Логи выводятся в systemd journal:</p>
+    <pre>
+journalctl -u forum -f
+    </pre>
+    <p>Либо проверяйте файл логов внутри приложения (если настроено логирование в файл).</p>
+
+    <p><strong>8.2. Резервное копирование базы данных:</strong></p>
+    <p>Рекомендуется настроить ежедневный бэкап с помощью cron:</p>
+    <pre>
+0 2 * * * pg_dump -U forum_user forum_db > /backup/forum_backup_$(date +\%F).sql
+    </pre>
+
+    <h3>9. УСТРАНЕНИЕ НЕИСПРАВНОСТЕЙ</h3>
+    <ul>
+        <li><strong>Приложение не запускается:</strong> Проверьте логи (`journalctl -u forum`), убедитесь, что порт 8080 не занят другим процессом, проверьте права доступа к файлу .jar и конфигурации.</li>
+        <li><strong>Ошибка подключения к БД:</strong> Проверьте логин/пароль в `application.properties`, убедитесь, что служба PostgreSQL активна (`systemctl status postgresql`), проверьте настройки `pg_hba.conf` (разрешение локальных подключений).</li>
+        <li><strong>Ошибки 502 Bad Gateway:</strong> Убедитесь, что приложение работает и слушает порт 8080, проверьте конфиг Nginx на наличие опечаток.</li>
+    </ul>
+</body>
+</html>
