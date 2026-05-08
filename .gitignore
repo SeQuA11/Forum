@@ -1,15 +1,11 @@
-```
 # Compiled and build artifacts
 *.class
 *.o
 *.obj
-*.exe
+*.out
 *.dll
 *.so
 *.a
-*.out
-build/
-target/
 
 # Dependencies
 venv/
@@ -17,6 +13,7 @@ venv/
 __pycache__/
 .mypy_cache/
 .pytest_cache/
+target/
 .gradle/
 
 # Logs and temp files
@@ -33,16 +30,12 @@ __pycache__/
 .vscode/
 .idea/
 
-# System
-.DS_Store
-Thumbs.db
+# Build directories
+build/
+dist/
+out/
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Compressed files
+# Archives
 *.zip
 *.gz
 *.tar
@@ -65,4 +58,3 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-```
