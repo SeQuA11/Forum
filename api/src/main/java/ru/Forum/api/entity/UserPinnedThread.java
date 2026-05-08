@@ -23,7 +23,7 @@ public class UserPinnedThread {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "pinned_at", nullable = false)
+    @Column(name = "pinned_at", nullable = true)
     private LocalDateTime pinnedAt = LocalDateTime.now();
 
     // Конструкторы
