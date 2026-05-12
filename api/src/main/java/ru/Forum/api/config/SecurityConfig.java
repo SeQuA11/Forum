@@ -58,6 +58,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**", "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/threads/**", "/api/threads/**").permitAll()
 
+                        // POST запрос на закрепление темы требует аутентификации (должен быть перед общими правилами)
+                        .requestMatchers(HttpMethod.POST, "/api/v1/threads/*/pin", "/api/threads/*/pin").authenticated()
+
                         // POST, PUT, DELETE запросы к темам требуют аутентификации
                         .requestMatchers(HttpMethod.POST, "/api/v1/threads/**", "/api/threads/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/threads/**", "/api/threads/**").authenticated()
