@@ -42,6 +42,13 @@ const ForumAPI = {
             });
 
             if (!response.ok) {
+                // Если токен недействителен (403), очищаем аутентификацию
+                if (response.status === 403 && AppState.jwtToken) {
+                    AppState.clearAuth();
+                    window.location.reload(); // Перезагружаем страницу для обновления UI
+                    throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+                }
+                
                 const errorText = await response.text();
                 let errorMessage = `HTTP ${response.status}`;
                 try {
