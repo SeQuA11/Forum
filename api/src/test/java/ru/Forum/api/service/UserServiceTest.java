@@ -182,17 +182,20 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Негативный тест 2: Регистрация с уже зарегистрированным email")
-    void testRegister_EmailAlreadyExists() {
+    @DisplayName("Негативный тест 2: Регистрация с пустым паролем")
+    void testRegister_EmptyPassword() {
         // Arrange
-        when(userRepository.existsByUsername(authRequestDTO.getUsername())).thenReturn(false);
-        when(userRepository.existsByEmail(authRequestDTO.getUsername())).thenReturn(true);
+        AuthRequestDTO requestWithEmptyPassword = new AuthRequestDTO();
+        requestWithEmptyPassword.setUsername("newuser");
+        requestWithEmptyPassword.setPassword("");
+        
+        when(userRepository.existsByUsername(requestWithEmptyPassword.getUsername())).thenReturn(false);
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            userService.register(authRequestDTO);
+            userService.register(requestWithEmptyPassword);
         });
-        assertEquals("Email уже зарегистрирован", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Пароль не может быть пустым"));
         verify(userRepository, never()).save(any(User.class));
     }
 
