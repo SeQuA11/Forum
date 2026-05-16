@@ -182,18 +182,17 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Негативный тест 2: Регистрация с пустым именем пользователя")
-    void testRegister_EmptyUsername() {
+    @DisplayName("Негативный тест 2: Регистрация с уже зарегистрированным email")
+    void testRegister_EmailAlreadyExists() {
         // Arrange
-        AuthRequestDTO emptyUsernameRequest = new AuthRequestDTO();
-        emptyUsernameRequest.setUsername("");
-        emptyUsernameRequest.setPassword("password123");
+        when(userRepository.existsByUsername(authRequestDTO.getUsername())).thenReturn(false);
+        when(userRepository.existsByEmail(authRequestDTO.getUsername())).thenReturn(true);
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            userService.register(emptyUsernameRequest);
+            userService.register(authRequestDTO);
         });
-        assertEquals("Имя пользователя не может быть пустым", exception.getMessage());
+        assertEquals("Email уже зарегистрирован", exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
     }
 
