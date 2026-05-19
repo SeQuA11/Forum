@@ -32,6 +32,10 @@ public class UserService {
             throw new RuntimeException("Email уже зарегистрирован");
         }
 
+        if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
+            throw new RuntimeException("Пароль не может быть пустым");
+        }
+
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getUsername());
